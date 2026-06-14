@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#1a3c5e"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="RCC POS"/>
+<title>Irfan RCC Pipe Factory</title>
+<link rel="manifest" href="/manifest.json"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏭</text></svg>"/>
+<script>
+// PWA SERVICE WORKER
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw.js')
+    .then(r=>console.log('SW OK',r.scope))
+    .catch(e=>console.log('SW err:',e));
+}
+// PWA INSTALL PROMPT
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  const btn=document.getElementById('installBtn');
+  if(btn)btn.style.display='inline-flex';
+});
+window.installPWA=function(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(r=>{
+      deferredPrompt=null;
+      const btn=document.getElementById('installBtn');
+      if(btn)btn.style.display='none';
+    });
+  }else{
+    alert('Chrome mein 3 dots (⋮) dabao\npھر "Add to Home Screen" click karo');
+  }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{--p:#1a3c5e;--pl:#2563a8;--ac:#c8870a;--bg:#eef2f7;--card:#fff;--sb:#0f2540;--tx:#1e2a38;--mu:#6b7a8d;--bo:#dde3ec;--gr:#16a34a;--re:#dc2626;--ye:#ca8a04;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--tx);display:flex;min-height:100vh;font-size:14px;overflow-x:hidden;}
+#sb{width:230px;background:var(--sb);color:#fff;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;z-index:200;transition:transform .3s;scrollbar-width:thin;}
+.sbl{padding:14px 12px 10px;border-bottom:1px solid rgba(255,255,255,.1);text-align:center;}
+.sbl .ico{font-size:26px;margin-bottom:4px;}
+.sbl .nm{font-size:11.5px;font-weight:800;color:#fff;line-height:1.3;}
+.sbl .sub{font-size:9px;color:rgba(255,255,255,.4);margin-top:2px;}
+nav{flex:1;padding:6px 0;}
+.ns{padding:6px 14px 2px;font-size:9.5px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:.08em;}
+.ni{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;font-size:12px;color:rgba(255,255,255,.7);border-left:3px solid transparent;transition:all .15s;}
+.ni:hover,.ni:active{background:rgba(255,255,255,.08);color:#fff;}
+.ni.active{background:rgba(37,99,168,.4);color:#fff;border-left-color:var(--ac);}
+.ni .ic{font-size:14px;width:17px;text-align:center;}
+.syb{padding:8px 12px;border-top:1px solid rgba(255,255,255,.1);font-size:10.5px;color:rgba(255,255,255,.5);}
+.sd{display:inline-block;width:7px;height:7px;border-radius:50%;background:#555;margin-right:4px;vertical-align:middle;}
+.sd.ok{background:#22c55e;}.sd.sy{background:#f59e0b;animation:pl 1s infinite;}
+@keyframes pl{0%,100%{opacity:1;}50%{opacity:.3;}}
+#main{margin-left:230px;flex:1;display:flex;flex-direction:column;min-height:100vh;max-width:calc(100vw - 230px);}
+.tb{background:var(--card);border-bottom:1px solid var(--bo);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.tbt{font-size:15px;font-weight:700;color:var(--p);}
+.tbt span{font-size:11px;color:var(--mu);font-weight:400;}
+.tbr{display:flex;gap:6px;align-items:center;}
+.btn{padding:6px 12px;border:none;border-radius:6px;cursor:pointer;font-size:11.5px;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;}
+.bp{background:var(--p);color:#fff;}.bp:hover{background:var(--pl);}
+.ba{background:var(--ac);color:#fff;}
+.bs{background:var(--gr);color:#fff;}
+.bd{background:var(--re);color:#fff;}
+.bo2{background:transparent;border:1px solid var(--p);color:var(--p);}
+.bwa{background:#25D366;color:#fff;}
+.bsm{padding:5px 9px;font-size:11px;}
+.br2{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+.cn{padding:16px;flex:1;}
+.pg{display:none;}.pg.active{display:block;}
+.card{background:var(--card);border:1px solid var(--bo);border-radius:10px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.ct{font-size:13px;font-weight:700;color:var(--p);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin-bottom:12px;}
+.sc{background:var(--card);border:1px solid var(--bo);border-radius:9px;padding:12px;border-left:4px solid var(--pl);}
+.sc.a{border-left-color:var(--ac);}.sc.s{border-left-color:var(--gr);}.sc.d{border-left-color:var(--re);}.sc.y{border-left-color:var(--ye);}
+.sl{font-size:9.5px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;}
+.sv{font-size:17px;font-weight:800;color:var(--p);}
+.ss{font-size:9.5px;color:var(--mu);margin-top:2px;}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead tr{background:var(--p);color:#fff;}
+th{padding:8px 9px;text-align:left;font-weight:600;font-size:11px;white-space:nowrap;}
+td{padding:7px 9px;border-bottom:1px solid var(--bo);vertical-align:middle;}
+tbody tr:hover{background:#f5f8ff;}
+tbody tr:last-child td{border-bottom:none;}
+.badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;}
+.bgr{background:#dcfce7;color:#15803d;}.bre{background:#fee2e2;color:#dc2626;}.bye{background:#fef9c3;color:#854d0e;}.bbl{background:#dbeafe;color:#1d4ed8;}.bor{background:#ffedd5;color:#9a3412;}
+.fg{display:flex;flex-direction:column;gap:3px;}
+.fg label{font-size:10.5px;font-weight:600;color:var(--mu);}
+.fg input,.fg select,.fg textarea{padding:7px 8px;border:1px solid var(--bo);border-radius:6px;font-size:12.5px;color:var(--tx);outline:none;transition:border .15s;background:#fff;width:100%;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--pl);}
+.fg textarea{resize:vertical;min-height:55px;}
+.fg2{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;}
+.sr{display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap;}
+.si{flex:1;min-width:150px;padding:7px 10px;border:1px solid var(--bo);border-radius:6px;font-size:12.5px;background:#fff;}
+.dv{border:none;border-top:1px solid var(--bo);margin:11px 0;}
+.itbl th{background:var(--p);color:#fff;padding:7px 7px;font-size:10.5px;}
+.itbl td{padding:4px 5px;border-bottom:1px solid var(--bo);}
+.itbl input,.itbl select{width:100%;padding:4px 5px;border:1px solid var(--bo);border-radius:4px;font-size:11.5px;}
+.tbox{background:linear-gradient(135deg,#0f2540,#1e4d7a);color:#fff;padding:13px 15px;border-radius:9px;min-width:250px;}
+.tr2{display:flex;justify-content:space-between;margin-bottom:4px;font-size:11.5px;}
+.tf2{font-size:16px;font-weight:800;border-top:1px solid rgba(255,255,255,.25);padding-top:6px;margin-top:4px;display:flex;justify-content:space-between;}
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;align-items:center;justify-content:center;padding:10px;}
+.mo.open{display:flex;}
+.md{background:#fff;border-radius:12px;padding:18px;width:100%;max-width:820px;max-height:94vh;overflow-y:auto;}
+.mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.mh h3{font-size:14px;font-weight:700;color:var(--p);}
+.mc{background:none;border:none;font-size:22px;cursor:pointer;color:var(--mu);padding:0 4px;}
+#toast{position:fixed;bottom:18px;right:16px;z-index:9999;background:var(--p);color:#fff;padding:9px 15px;border-radius:8px;font-size:12px;font-weight:600;transform:translateY(60px);opacity:0;transition:all .3s;max-width:280px;}
+#toast.show{transform:translateY(0);opacity:1;}
+#toast.ok{background:var(--gr);}#toast.err{background:var(--re);}
+.lo{display:none;position:fixed;inset:0;background:rgba(15,37,64,.9);z-index:9998;align-items:center;justify-content:center;flex-direction:column;gap:12px;}
+.lo.show{display:flex;}
+.sp{width:40px;height:40px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.lt{color:#fff;font-size:13px;font-weight:600;}
+.off{display:none;background:#dc2626;color:#fff;text-align:center;padding:5px;font-size:11.5px;font-weight:600;}
+.off.show{display:block;}
+@media(max-width:768px){
+  #sb{transform:translateX(-100%);}
+  #sb.open{transform:translateX(0);}
+  #main{margin-left:0;max-width:100vw;}
+  .two{grid-template-columns:1fr;}
+  .sg{grid-template-columns:1fr 1fr;}
+  #mbtn{display:flex!important;}
+  .tbt{font-size:13px;}
+}
+#mbtn{display:none;}
+/* LEDGER */
+.led-card{background:linear-gradient(135deg,#0f2540,#1a3c5e);color:#fff;border-radius:10px;padding:14px;margin-bottom:10px;}
+.led-name{font-size:16px;font-weight:800;}
+.led-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;}
+.led-stat{background:rgba(255,255,255,.1);border-radius:7px;padding:8px;text-align:center;}
+.led-stat .lv{font-size:14px;font-weight:800;}
+.led-stat .ll{font-size:9px;opacity:.7;margin-top:2px;}
+/* PRODUCTION */
+.prod-card{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:11px;margin-bottom:8px;}
+/* DOC PRINT */
+.pdoc{font-family:'Segoe UI',Arial,sans-serif;background:#fff;}
+.dph{background:linear-gradient(135deg,#0f2540,#1e4476);padding:18px 22px 14px;display:grid;grid-template-columns:1fr auto;gap:12px;}
+.dph-l .dn{font-size:19px;font-weight:900;color:#fff;letter-spacing:.3px;}
+.dph-l .dt{font-size:9.5px;color:rgba(255,255,255,.55);margin-top:1px;font-style:italic;}
+.dph-l .di{margin-top:9px;font-size:9.5px;color:rgba(255,255,255,.78);line-height:1.9;}
+.dph-r .dtype{font-size:25px;font-weight:900;color:#fff;text-align:right;}
+.dph-r .dtype2{font-size:13px;color:rgba(255,255,255,.65);text-align:right;direction:rtl;}
+.dph-r .dmeta{margin-top:8px;font-size:10px;color:rgba(255,255,255,.72);text-align:right;line-height:1.9;}
+.dph-r .dmeta b{color:#fff;}
+.dbar{height:4px;background:linear-gradient(90deg,#c8870a,#f0b03a,#c8870a);}
+.dbody{padding:17px 20px;}
+.dparties{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;}
+.dparty{background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:11px 13px;}
+.dparty.bill{border-left:3px solid #c8870a;}
+.dparty.from{border-left:3px solid #1a3c5e;}
+.dpl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7a8d;margin-bottom:5px;}
+.dpn{font-size:13px;font-weight:700;color:#1a3c5e;margin-bottom:3px;}
+.dpi{font-size:10.5px;color:#555;line-height:1.7;}
+.dititle{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6b7a8d;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid #1a3c5e;}
+.dptbl{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:13px;}
+.dptbl thead tr{background:#1a3c5e;}
+.dptbl th{color:#fff;padding:8px 10px;text-align:left;font-size:10.5px;font-weight:600;}
+.dptbl tbody tr:nth-child(even){background:#f8fafc;}
+.dptbl td{padding:8px 10px;border-bottom:1px solid #eaecef;}
+.dtots{display:flex;justify-content:flex-end;margin-bottom:14px;}
+.dtbox{width:265px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;}
+.dtr{display:flex;justify-content:space-between;padding:6px 12px;font-size:11.5px;border-bottom:1px solid #eaecef;}
+.dtf{display:flex;justify-content:space-between;padding:9px 12px;font-size:15px;font-weight:800;background:#1a3c5e;color:#fff;}
+.dpay{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:9px 12px;margin-bottom:13px;font-size:11px;color:#166534;}
+.dterms{background:#fafafa;border:1px solid #e5e7eb;border-radius:7px;padding:11px 13px;margin-bottom:12px;}
+.dtitle2{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#1a3c5e;margin-bottom:7px;}
+.dlist{list-style:none;padding:0;}
+.dlist li{font-size:10px;color:#555;line-height:1.6;padding:2.5px 0 2.5px 13px;position:relative;border-bottom:1px dashed #e5e7eb;}
+.dlist li:last-child{border-bottom:none;}
+.dlist li::before{content:"✓";position:absolute;left:0;color:#c8870a;font-weight:700;font-size:9px;}
+.dsigs{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:12px;}
+.dsig{border-top:1.5px solid #1a3c5e;padding-top:6px;font-size:10px;color:#6b7a8d;text-align:center;}
+.dsigt{font-weight:600;color:#1a3c5e;margin-bottom:18px;}
+.dfoot{background:linear-gradient(135deg,#0f2540,#1e4476);color:rgba(255,255,255,.72);text-align:center;padding:10px;font-size:10px;line-height:1.8;}
+.dfoot b{color:#fff;}
+</style>
+</head>
+<body>
+<div class="off" id="offbar">📵 Offline Mode — Data saved locally</div>
+<div id="sb">
+  <div class="sbl">
+    <div class="ico">🏭</div>
+    <div class="nm">Irfan RCC Pipe Factory</div>
+    <div class="sub">POS & Business Manager</div>
+  </div>
+  <nav>
+    <div class="ns">Main</div>
+    <div class="ni active" onclick="go('dashboard')"><span class="ic">📊</span>Dashboard</div>
+    <div class="ns">Sales / فروخت</div>
+    <div class="ni" onclick="go('invoice')"><span class="ic">🧾</span>Invoice / رسید</div>
+    <div class="ni" onclick="go('quotation')"><span class="ic">📋</span>Quotation / کوٹیشن</div>
+    <div class="ni" onclick="go('returns')"><span class="ic">↩️</span>Returns / واپسی</div>
+    <div class="ns">Accounts / حسابات</div>
+    <div class="ni" onclick="go('ledger')"><span class="ic">📒</span>Ledger / کھاتہ</div>
+    <div class="ni" onclick="go('production')"><span class="ic">🏗️</span>Production / پیداوار</div>
+    <div class="ns">Stock / اسٹاک</div>
+    <div class="ni" onclick="go('items')"><span class="ic">🧱</span>Items / اشیاء</div>
+    <div class="ni" onclick="go('inventory')"><span class="ic">📦</span>Inventory</div>
+    <div class="ns">People / لوگ</div>
+    <div class="ni" onclick="go('customers')"><span class="ic">👥</span>Customers / گاہک</div>
+    <div class="ni" onclick="go('suppliers')"><span class="ic">🚛</span>Suppliers / فیکٹریاں</div>
+    <div class="ni" onclick="go('purchases')"><span class="ic">🛒</span>Purchases / خریداری</div>
+    <div class="ni" onclick="go('employees')"><span class="ic">👷</span>Employees / ملازمین</div>
+    <div class="ns">Finance</div>
+    <div class="ni" onclick="go('expenses')"><span class="ic">💸</span>Expenses / اخراجات</div>
+  </nav>
+  <div class="syb"><span class="sd" id="sd"></span><span id="st">Connecting...</span></div>
+</div>
+
+<div id="main">
+  <div class="off" id="offbar2">📵 Offline — Using saved data</div>
+  <div class="tb">
+    <div class="tbt" id="pt">Dashboard</div>
+    <div class="tbr">
+      <button class="btn bs bsm" onclick="manualSync()">☁️ Sync</button>
+      <button class="btn bp bsm" onclick="exportData()">⬇️ Backup</button>
+      <button class="btn bo2 bsm" id="mbtn" onclick="toggleSB()">☰ Menu</button>
+      <button class="btn bs bsm" id="installBtn" onclick="installPWA()" style="display:none">📱 Install App</button>
+    </div>
+  </div>
+  <div class="cn">
+
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="pg active">
+      <div class="sg">
+        <div class="sc a"><div class="sl">Today / آج کی فروخت</div><div class="sv" id="s1">PKR 0</div><div class="ss">Sales today</div></div>
+        <div class="sc s"><div class="sl">Monthly / ماہانہ</div><div class="sv" id="s2">PKR 0</div><div class="ss">This month</div></div>
+        <div class="sc"><div class="sl">Customers / گاہک</div><div class="sv" id="s3">0</div><div class="ss">Total registered</div></div>
+        <div class="sc d"><div class="sl">Receivable / باقی وصول</div><div class="sv" id="s7">PKR 0</div><div class="ss">Pending from customers</div></div>
+        <div class="sc y"><div class="sl">Expenses / اخراجات</div><div class="sv" id="s4">PKR 0</div><div class="ss">This month</div></div>
+        <div class="sc"><div class="sl">Today Production</div><div class="sv" id="s8">0</div><div class="ss">Units made today</div></div>
+      </div>
+      <div class="two">
+        <div class="card"><div class="ct">🧾 Recent Invoices</div><div class="tw"><table><thead><tr><th>Invoice#</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead><tbody id="d1"></tbody></table></div></div>
+        <div class="card"><div class="ct">⚠️ Low Stock / کم اسٹاک</div><div class="tw"><table><thead><tr><th>Item</th><th>Stock</th><th>Min</th></tr></thead><tbody id="d2"></tbody></table></div></div>
+      </div>
+      <div class="two">
+        <div class="card"><div class="ct">📒 Pending Payments / باقی ادائیگیاں</div><div class="tw"><table><thead><tr><th>Customer</th><th>Total</th><th>Paid</th><th>Balance</th></tr></thead><tbody id="d3"></tbody></table></div></div>
+        <div class="card"><div class="ct">🏗️ Recent Production</div><div class="tw"><table><thead><tr><th>Date</th><th>Item</th><th>Qty</th><th>Shift</th></tr></thead><tbody id="d4"></tbody></table></div></div>
+      </div>
+    </div>
+
+    <!-- LEDGER / LAIN DAIN -->
+    <div id="page-ledger" class="pg">
+      <div class="card">
+        <div class="ct">📒 Customer Ledger / گاہک کا کھاتہ — لین دین</div>
+        <div class="fg2">
+          <div class="fg"><label>Customer / گاہک *</label><select id="led-c"><option value="">-- Select Customer --</option></select></div>
+          <div class="fg"><label>Date / تاریخ</label><input id="led-d" type="date"/></div>
+          <div class="fg"><label>Type / قسم</label>
+            <select id="led-t">
+              <option value="sale">Sale / فروخت</option>
+              <option value="payment">Payment Received / ادائیگی موصول</option>
+              <option value="return">Return / واپسی</option>
+              <option value="advance">Advance / پیشگی</option>
+            </select>
+          </div>
+          <div class="fg"><label>Amount PKR / رقم *</label><input id="led-a" type="number" placeholder="0"/></div>
+          <div class="fg"><label>Description / تفصیل</label><input id="led-desc" placeholder="Details of transaction"/></div>
+          <div class="fg"><label>Invoice # (optional)</label><input id="led-inv" placeholder="INV-XXXX"/></div>
+        </div>
+        <div class="br2"><button class="btn bp" onclick="saveLed()">✅ Save Transaction</button></div>
+      </div>
+      <!-- Customer Account Summary -->
+      <div class="card">
+        <div class="ct">📊 Customer Account Summary / گاہک کا حساب</div>
+        <div class="sr"><select class="si" id="led-filter" onchange="renderLedger()" style="max-width:280px"><option value="">-- All Customers --</option></select></div>
+        <div id="led-summary"></div>
+        <div class="tw" style="margin-top:12px"><table><thead><tr><th>Date</th><th>Customer</th><th>Type</th><th>Amount PKR</th><th>Description</th><th>Invoice#</th><th>Action</th></tr></thead><tbody id="led-tb"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- PRODUCTION -->
+    <div id="page-production" class="pg">
+      <div class="card">
+        <div class="ct">🏗️ Add Production Record / پیداوار درج کریں</div>
+        <div class="fg2">
+          <div class="fg"><label>Date / تاریخ *</label><input id="pr-d" type="date"/></div>
+          <div class="fg"><label>Item / چیز *</label><select id="pr-i"><option value="">-- Select Item --</option></select></div>
+          <div class="fg"><label>Qty Produced / پیداوار *</label><input id="pr-q" type="number" placeholder="0"/></div>
+          <div class="fg"><label>Shift / شفٹ</label>
+            <select id="pr-s"><option>Morning / صبح</option><option>Evening / شام</option><option>Night / رات</option><option>Full Day</option></select>
+          </div>
+          <div class="fg"><label>Workers / مزدور</label><input id="pr-w" type="number" placeholder="Number of workers"/></div>
+          <div class="fg"><label>Supervisor</label><input id="pr-sup" placeholder="Supervisor name"/></div>
+          <div class="fg"><label>Labour Cost PKR / مزدوری</label><input id="pr-lc" type="number" placeholder="0"/></div>
+          <div class="fg"><label>Notes / نوٹس</label><input id="pr-n" placeholder="Any issues or notes"/></div>
+        </div>
+        <div class="br2"><button class="btn bp" onclick="saveProd()">✅ Save Production</button></div>
+      </div>
+      <div class="card">
+        <div class="ct">📊 Production Summary / پیداوار خلاصہ</div>
+        <div class="sr">
+          <input class="si" id="pr-search" placeholder="🔍 Search..." oninput="renderProd()"/>
+          <input type="date" id="pr-df" onchange="renderProd()" style="padding:7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;background:#fff;"/>
+          <input type="date" id="pr-dt" onchange="renderProd()" style="padding:7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;background:#fff;"/>
+        </div>
+        <div id="pr-total" style="font-weight:700;color:var(--p);margin-bottom:8px;font-size:12.5px;"></div>
+        <div class="tw"><table><thead><tr><th>Date</th><th>Item</th><th>Qty</th><th>Shift</th><th>Workers</th><th>Labour PKR</th><th>Supervisor</th><th>Notes</th><th>Action</th></tr></thead><tbody id="pr-tb"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ITEMS -->
+    <div id="page-items" class="pg">
+      <div class="card">
+        <div class="ct">🧱 Add Item / نئی چیز شامل کریں</div>
+        <div class="fg2">
+          <div class="fg"><label>Item Name / نام *</label><input id="in1" placeholder="e.g. RCC Pipe 9 inch"/></div>
+          <div class="fg"><label>Category / قسم</label><select id="in2"><option>RCC Pipe</option><option>Concrete Ring</option><option>Precast Slab</option><option>Precast Stairs</option><option>Manhole Cover</option><option>Boundary Wall</option><option>Tuff Tile</option><option>Beam</option><option>Other</option></select></div>
+          <div class="fg"><label>Unit / یونٹ</label><select id="in3"><option>Piece / عدد</option><option>Foot / فٹ</option><option>Meter</option><option>Kg</option><option>Set</option><option>Square Foot</option></select></div>
+          <div class="fg"><label>Purchase Rate PKR / خرید ریٹ</label><input id="in4" type="number" placeholder="0"/></div>
+          <div class="fg"><label>Sale Rate PKR / فروخت ریٹ</label><input id="in5" type="number" placeholder="0"/></div>
+          <div class="fg"><label>Current Stock / موجودہ مقدار</label><input id="in6" type="number" placeholder="0"/></div>
+          <div class="fg"><label>Min Stock Alert / کم از کم</label><input id="in7" type="number" placeholder="5"/></div>
+          <div class="fg"><label>Description / تفصیل</label><input id="in8" placeholder="Specs..."/></div>
+        </div>
+        <div class="br2"><button class="btn bp" id="saveItemBtn" onclick="saveItem()">✅ Save Item</button><button class="btn bo2" onclick="clrItem();editItemId=null;const b=document.getElementById('saveItemBtn');if(b){b.textContent='✅ Save Item';b.className='btn bp';}">🔄 Cancel</button></div>
+      </div>
+      <div class="card">
+        <div class="ct">📦 Items List / اشیاء کی فہرست</div>
+        <div class="sr"><input class="si" id="is1" placeholder="🔍 Search items..." oninput="renderItems()"/></div>
+        <div class="tw"><table><thead><tr><th>#</th><th>Name</th><th>Category</th><th>Unit</th><th>Buy PKR</th><th>Sale PKR</th><th>Stock</th><th>Action</th></tr></thead><tbody id="itb"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- INVENTORY -->
+    <div id="page-inventory" class="pg">
+      <div class="card">
+        <div class="ct">📦 Inventory Overview / انوینٹری</div>
+        <div class="sr"><input class="si" id="ivs" placeholder="🔍 Search..." oninput="renderInv()"/></div>
+        <div class="tw"><table><thead><tr><th>#</th><th>Item</th><th>Category</th><th>Stock</th><th>Min</th><th>Buy Rate</th><th>Sale Rate</th><th>Value PKR</th><th>Status</th></tr></thead><tbody id="ivb"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- CUSTOMERS -->
+    <div id="page-customers" class="pg">
+      <div class="card">
+        <div class="ct">👥 Add Customer / گاہک شامل کریں</div>
+        <div class="fg2">
+          <div class="fg"><label>Name / نام *</label><input id="cn1" placeholder="Customer full name"/></div>
+          <div class="fg"><label>Phone / موبائل</label><input id="cn2" placeholder="03XX-XXXXXXX"/></div>
+          <div class="fg"><label>Address / پتہ</label><input id="cn3" placeholder="Full address"/></div>
+          <div class="fg"><label>City / شہر</label><input id="cn4" placeholder="e.g. Islamabad"/></div>
+          <div class="fg"><label>CNIC (optional)</label><input id="cn6" placeholder="XXXXX-XXXXXXX-X"/></div>
+          <div class="fg"><label>Opening Balance PKR</label><input id="cn7" type="number" placeholder="0" title="If customer already owes money"/></div>
+        </div>
+        <div class="br2"><button class="btn bp" onclick="saveCust()">✅ Save Customer</button></div>
+      </div>
+      <div class="card">
+        <div class="ct">👥 Customers List / گاہکوں کی فہرست</div>
+        <div class="sr"><input class="si" id="cs1" placeholder="🔍 Search..." oninput="renderCusts()"/></div>
+        <div class="tw"><table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>City</th><th>Total Sales</th><th>Paid</th><th>Balance</th><th>Action</th></tr></thead><tbody id="ctb"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- SUPPLIERS -->
+    <div id="page-suppliers" class="pg">
+      <div class="card">
+        <div class="ct">🚛 Add Supplier / فیکٹری شامل کریں</div>
+        <div class="fg2">
+          <div class="fg"><label>Name *</label><input id="su1" placeholder="Factory/Supplier name"/></div>
+          <div class="fg"><label>Contact Person</label><input id="su2" placeholder="Contact name"/></div>
+          <div class="fg"><label>Phone</label><input id="su3" placeholder="03XX-XXXXXXX"/></div>
+          <div class="fg"><label>Address</label><input id="su4" placeholder="Full address"/></div>
+          <div class="fg"><label>City</label><input id="su5" placeholder="City"/></div>
+          <div class="fg"><label>Supply Type</label><select id="su6"><option>Raw Material</option><option>Finished Products</option><option>Equipment</option><option>Transport</option><option>Other</option></select></div>
+        </div>
+        <div class="br2"><button class="btn bp" onclick="saveSupp()">✅ Save Supplier</button></div>
+      </div>
+      <div class="card"><div class="ct">🚛 Suppliers List</div><div class="tw"><table><thead><tr><th>#</th><th>Name</th><th>Contact</th><th>Phone</th><th>City</th><th>Type</th><th>Action</th></tr></thead><tbody id="stb"></tbody></table></div></div>
+    </div>
+
+    <!-- EMPLOYEES -->
+    <div id="page-employees" class="pg">
+      <div class="card">
+        <div class="ct">👷 Add Employee / ملازم شامل کریں</div>
+        <div class="fg2">
+          <div class="fg"><label>Name / نام *</label><input id="em1" placeholder="Full name"/></div>
+          <div class="fg"><label>CNIC</label><input id="em2" placeholder="XXXXX-XXXXXXX-X"/></div>
+          <div class="fg"><label>Phone</label><input id="em3" placeholder="03XX-XXXXXXX"/></div>
+          <div class="fg"><label>Designation / عہدہ</label><select id="em4"><option>Factory Worker</option><option>Driver</option><option>Accountant</option><option>Supervisor</option><option>Manager</option><option>Security Guard</option><option>Other</option></select></div>
+          <div class="fg"><label>Monthly Salary PKR</label><input id="em5" type="number" placeholder="0"/></div>
+          <div class="fg"><label>Join Date</label><input id="em6" type="date"/></div>
+          <div class="fg"><label>Address</label><input id="em7" placeholder="Address"/></div>
+        </div>
+        <div class="br2"><button class="btn bp" onclick="saveEmp()">✅ Save Employee</button></div>
+      </div>
+      <div class="card"><div class="ct">👷 Employees List</div><div class="tw"><table><thead><tr><th>#</th><th>Name</th><th>CNIC</th><th>Phone</th><th>Role</th><th>Salary PKR</th><th>Join Date</th><th>Action</th></tr></thead><tbody id="etb"></tbody></table></div></div>
+    </div>
+
+    <!-- EXPENSES -->
+    <div id="page-expenses" class="pg">
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="btn bp" id="etab1" onclick="showExpTab('factory')">🏭 Factory</button>
+        <button class="btn bo2" id="etab2" onclick="showExpTab('office')">🏢 Office</button>
+        <button class="btn bo2" id="etab3" onclick="showExpTab('transport')">🚛 Transport</button>
+      </div>
+
+      <!-- FACTORY -->
+      <div id="exp-factory">
+        <div class="card">
+          <div class="ct">🏭 Factory Expense / فیکٹری خرچہ</div>
+          <div class="fg2">
+            <div class="fg"><label>Date</label><input id="fex1" type="date"/></div>
+            <div class="fg"><label>Category / قسم</label>
+              <select id="fex2">
+                <option>Worker Labour / مزدوری</option>
+                <option>Raw Material / خام مال</option>
+                <option>Factory Electricity / بجلی</option>
+                <option>Factory Fuel / تیل</option>
+                <option>Machine Repair / مشین مرمت</option>
+                <option>Factory Rent / فیکٹری کرایہ</option>
+                <option>Equipment / آلات</option>
+                <option>Worker Salary / تنخواہ</option>
+                <option>Factory Other / دیگر</option>
+              </select>
+            </div>
+            <div class="fg"><label>Description / تفصیل</label><input id="fex3" placeholder="Details..."/></div>
+            <div class="fg"><label>Amount PKR *</label><input id="fex4" type="number" placeholder="0"/></div>
+            <div class="fg"><label>Paid To / کس کو</label><input id="fex5" placeholder="Name"/></div>
+            <div class="fg"><label>Method</label><select id="fex6"><option>Cash</option><option>Easypaisa</option><option>JazzCash</option><option>Bank</option></select></div>
+          </div>
+          <div class="br2"><button class="btn bp" onclick="saveFactoryExp()">✅ Save</button></div>
+        </div>
+        <div class="card">
+          <div class="ct">🏭 Factory Expenses List</div>
+          <div class="sr"><input class="si" id="fexs" placeholder="Search..." oninput="renderFactoryExp()"/></div>
+          <div id="fext" style="font-weight:700;color:var(--re);margin-bottom:7px;font-size:12px;"></div>
+          <div class="tw"><table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Paid To</th><th>Method</th><th></th></tr></thead><tbody id="fextb"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- OFFICE -->
+      <div id="exp-office" style="display:none">
+        <div class="card">
+          <div class="ct">🏢 Office Expense / دفتر خرچہ</div>
+          <div class="fg2">
+            <div class="fg"><label>Date</label><input id="oex1" type="date"/></div>
+            <div class="fg"><label>Category / قسم</label>
+              <select id="oex2">
+                <option>Office Rent / دفتر کرایہ</option>
+                <option>Staff Salary / تنخواہ</option>
+                <option>Office Electricity / بجلی</option>
+                <option>Internet / انٹرنیٹ</option>
+                <option>Stationery / قرطاسیہ</option>
+                <option>Vehicle Fuel / گاڑی تیل</option>
+                <option>Vehicle Repair / گاڑی مرمت</option>
+                <option>Marketing / مارکیٹنگ</option>
+                <option>Office Other / دیگر</option>
+              </select>
+            </div>
+            <div class="fg"><label>Description / تفصیل</label><input id="oex3" placeholder="Details..."/></div>
+            <div class="fg"><label>Amount PKR *</label><input id="oex4" type="number" placeholder="0"/></div>
+            <div class="fg"><label>Paid To / کس کو</label><input id="oex5" placeholder="Name"/></div>
+            <div class="fg"><label>Method</label><select id="oex6"><option>Cash</option><option>Easypaisa</option><option>JazzCash</option><option>Bank</option></select></div>
+          </div>
+          <div class="br2"><button class="btn bp" onclick="saveOfficeExp()">✅ Save</button></div>
+        </div>
+        <div class="card">
+          <div class="ct">🏢 Office Expenses List</div>
+          <div class="sr"><input class="si" id="oexs" placeholder="Search..." oninput="renderOfficeExp()"/></div>
+          <div id="oext" style="font-weight:700;color:var(--re);margin-bottom:7px;font-size:12px;"></div>
+          <div class="tw"><table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Paid To</th><th>Method</th><th></th></tr></thead><tbody id="oextb"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- TRANSPORT -->
+      <div id="exp-transport" style="display:none">
+        <div class="card">
+          <div class="ct">🚛 Transport Record / ٹرانسپورٹ</div>
+          <div style="background:#dbeafe;border:1px solid #93c5fd;border-radius:7px;padding:10px 13px;margin-bottom:12px;font-size:12px;color:#1d4ed8">
+            💡 <b>Shazor/Loader ka kiraya aur customer se liya — منافع apne aap dikhega!</b>
+          </div>
+          <div class="fg2">
+            <div class="fg"><label>Date</label><input id="tex1" type="date"/></div>
+            <div class="fg"><label>Vehicle Type</label>
+              <select id="tex2">
+                <option>Shazor / شازور</option>
+                <option>Loader / لوڈر</option>
+                <option>Truck / ٹرک</option>
+                <option>Pickup / پک اپ</option>
+                <option>Tractor / ٹریکٹر</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="fg"><label>Driver/Owner Name</label><input id="tex3" placeholder="e.g. Ahmad shazor wala"/></div>
+            <div class="fg"><label>Route / راستہ</label><input id="tex4" placeholder="e.g. Factory to Islamabad"/></div>
+            <div class="fg"><label>Customer</label><input id="tex5" placeholder="Customer name"/></div>
+            <div class="fg"><label>🔴 Actual Cost / اصل خرچہ</label><input id="tex6" type="number" placeholder="e.g. 3000" oninput="calcTransport()"/></div>
+            <div class="fg"><label>🟢 Charged from Customer / گاہک سے لیا</label><input id="tex7" type="number" placeholder="e.g. 4000" oninput="calcTransport()"/></div>
+            <div class="fg"><label>Method</label><select id="tex8"><option>Cash</option><option>Easypaisa</option><option>JazzCash</option><option>Bank</option></select></div>
+            <div class="fg"><label>Notes</label><input id="tex9" placeholder="Notes..."/></div>
+          </div>
+          <div style="background:linear-gradient(135deg,#0f2540,#1a3c5e);color:#fff;border-radius:8px;padding:13px;margin-top:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center">
+            <div><div style="font-size:10px;opacity:.7">Actual Cost</div><div style="font-size:15px;font-weight:800;color:#fca5a5" id="tp-cost">PKR 0</div></div>
+            <div><div style="font-size:10px;opacity:.7">From Customer</div><div style="font-size:15px;font-weight:800;color:#86efac" id="tp-charged">PKR 0</div></div>
+            <div><div style="font-size:10px;opacity:.7" id="tp-label">Your Profit / منافع</div><div style="font-size:17px;font-weight:900;color:#fbbf24" id="tp-profit">PKR 0</div></div>
+          </div>
+          <div class="br2"><button class="btn bp" onclick="saveTransport()">✅ Save Transport</button></div>
+        </div>
+        <div class="card">
+          <div class="ct">🚛 Transport Records</div>
+          <div class="sr"><input class="si" id="texs" placeholder="Search..." oninput="renderTransport()"/></div>
+          <div id="text-total" style="font-weight:700;color:var(--gr);margin-bottom:7px;font-size:12px;"></div>
+          <div class="tw"><table><thead><tr><th>Date</th><th>Vehicle</th><th>Route</th><th>Customer</th><th>Cost PKR</th><th>Charged PKR</th><th>Profit PKR</th><th></th></tr></thead><tbody id="textb"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- PURCHASES -->
+    <div id="page-purchases" class="pg">
+      <!-- TABS -->
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="btn bp" id="ptab1" onclick="showPurTab('add')">➕ New Purchase</button>
+        <button class="btn bo2" id="ptab2" onclick="showPurTab('history')">📜 History / تاریخ</button>
+        <button class="btn bo2" id="ptab3" onclick="showPurTab('ledger')">📒 Factory Ledger / کھاتہ</button>
+      </div>
+
+      <!-- ADD PURCHASE -->
+      <div id="pur-add">
+        <div class="card">
+          <div class="ct">🛒 New Purchase / نئی خریداری</div>
+          <div class="fg2">
+            <div class="fg"><label>Date / تاریخ *</label><input id="pu-date" type="date"/></div>
+            <div class="fg"><label>Supplier / فیکٹری *</label><select id="pu-sup"><option value="">-- Select Supplier --</option></select></div>
+            <div class="fg"><label>Item / چیز *</label><select id="pu-item"><option value="">-- Select Item --</option></select></div>
+            <div class="fg"><label>Qty / مقدار *</label><input id="pu-qty" type="number" placeholder="0" oninput="calcPurchase()"/></div>
+            <div class="fg"><label>Purchase Rate PKR / خرید ریٹ</label><input id="pu-rate" type="number" placeholder="0" oninput="calcPurchase()"/></div>
+            <div class="fg"><label>Transport Cost PKR / ٹرانسپورٹ</label><input id="pu-trans" type="number" placeholder="0" oninput="calcPurchase()"/></div>
+            <div class="fg"><label>Payment Made PKR / ادائیگی کی</label><input id="pu-paid" type="number" placeholder="0" oninput="calcPurchase()"/></div>
+            <div class="fg"><label>Payment Method</label><select id="pu-meth"><option>Cash</option><option>Easypaisa</option><option>JazzCash</option><option>Bank Transfer</option><option>Credit / ادھار</option></select></div>
+            <div class="fg"><label>Notes / نوٹس</label><input id="pu-notes" placeholder="Any notes..."/></div>
+          </div>
+          <!-- PURCHASE TOTAL BOX -->
+          <div style="background:linear-gradient(135deg,#0f2540,#1a3c5e);color:#fff;border-radius:9px;padding:13px;margin-top:12px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;text-align:center">
+            <div><div style="font-size:9px;opacity:.7">Items Total</div><div style="font-size:14px;font-weight:800;color:#86efac" id="pu-itotal">PKR 0</div></div>
+            <div><div style="font-size:9px;opacity:.7">Transport</div><div style="font-size:14px;font-weight:800;color:#fca5a5" id="pu-ttotal">PKR 0</div></div>
+            <div><div style="font-size:9px;opacity:.7">Grand Total</div><div style="font-size:14px;font-weight:800;color:#fff" id="pu-gtotal">PKR 0</div></div>
+            <div><div style="font-size:9px;opacity:.7">Balance Due / باقی</div><div style="font-size:14px;font-weight:800;color:#fbbf24" id="pu-balance">PKR 0</div></div>
+          </div>
+          <div class="br2" style="margin-top:12px">
+            <button class="btn bp" onclick="savePurchase()">✅ Save Purchase</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div id="pur-history" style="display:none">
+        <div class="card">
+          <div class="ct">📜 Purchase History / خریداری کی تاریخ</div>
+          <div class="sr">
+            <input class="si" id="pur-search" placeholder="🔍 Search supplier/item..." oninput="renderPurchases()"/>
+            <select id="pur-sup-filter" onchange="renderPurchases()" style="padding:7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;background:#fff"><option value="">All Suppliers</option></select>
+            <input type="date" id="pur-df" onchange="renderPurchases()" style="padding:7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;background:#fff"/>
+            <input type="date" id="pur-dt" onchange="renderPurchases()" style="padding:7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;background:#fff"/>
+          </div>
+          <div id="pur-totals-display" style="font-weight:700;color:var(--p);margin-bottom:8px;font-size:12.5px;"></div>
+          <div class="tw"><table><thead><tr><th>Date</th><th>Supplier</th><th>Item</th><th>Qty</th><th>Rate</th><th>Transport</th><th>Total</th><th>Paid</th><th>Balance</th><th>Action</th></tr></thead><tbody id="pur-tb"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- FACTORY LEDGER -->
+      <div id="pur-ledger" style="display:none">
+        <div class="card">
+          <div class="ct">📒 Factory Ledger / فیکٹری کھاتہ</div>
+          <div class="sr">
+            <select id="pur-led-filter" onchange="renderFactoryLedger()" style="padding:7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;min-width:200px;background:#fff"><option value="">-- Select Factory --</option></select>
+          </div>
+          <div id="pur-led-summary"></div>
+          <div class="tw" style="margin-top:10px">
+            <table><thead><tr><th>Date</th><th>Type</th><th>Item</th><th>Qty</th><th>Amount PKR</th><th>Balance PKR</th><th>Notes</th></tr></thead>
+            <tbody id="pur-led-tb"></tbody></table>
+          </div>
+        </div>
+        <!-- ADD PAYMENT TO FACTORY -->
+        <div class="card">
+          <div class="ct">💰 Record Payment to Factory / فیکٹری کو ادائیگی</div>
+          <div class="fg2">
+            <div class="fg"><label>Factory / فیکٹری</label><select id="pur-pay-sup"><option value="">-- Select --</option></select></div>
+            <div class="fg"><label>Date</label><input id="pur-pay-date" type="date"/></div>
+            <div class="fg"><label>Amount PKR / رقم *</label><input id="pur-pay-amt" type="number" placeholder="0"/></div>
+            <div class="fg"><label>Method</label><select id="pur-pay-meth"><option>Cash</option><option>Easypaisa</option><option>JazzCash</option><option>Bank Transfer</option></select></div>
+            <div class="fg"><label>Notes</label><input id="pur-pay-notes" placeholder="Notes..."/></div>
+          </div>
+          <div class="br2"><button class="btn bs" onclick="saveFactoryPayment()">💰 Save Payment</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RETURNS -->
+    <div id="page-returns" class="pg">
+      <div class="card">
+        <div class="ct">↩️ Add Return / واپسی</div>
+        <div class="fg2">
+          <div class="fg"><label>Date</label><input id="rt1" type="date"/></div>
+          <div class="fg"><label>Invoice #</label><input id="rt2" placeholder="INV-XXXX"/></div>
+          <div class="fg"><label>Customer</label><select id="rt3"><option value="">-- Select --</option></select></div>
+          <div class="fg"><label>Item</label><select id="rt4"><option value="">-- Select Item --</option></select></div>
+          <div class="fg"><label>Qty Returned</label><input id="rt5" type="number" placeholder="0"/></div>
+          <div class="fg"><label>Reason / وجہ</label><select id="rt6"><option>Defective / خراب</option><option>Wrong Item</option><option>Excess</option><option>Other</option></select></div>
+          <div class="fg"><label>Refund Amount PKR</label><input id="rt7" type="number" placeholder="0"/></div>
+          <div class="fg"><label>Status</label><select id="rt8"><option>Pending</option><option>Approved</option><option>Rejected</option></select></div>
+        </div>
+        <div class="br2"><button class="btn bp" onclick="saveRet()">✅ Save Return</button></div>
+      </div>
+      <div class="card"><div class="ct">↩️ Returns List</div><div class="tw"><table><thead><tr><th>Date</th><th>Invoice#</th><th>Customer</th><th>Item</th><th>Qty</th><th>Refund</th><th>Status</th><th>Action</th></tr></thead><tbody id="rttb"></tbody></table></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PREVIEW MODAL -->
+<div class="mo" id="pmo">
+  <div class="md">
+    <div class="mh">
+      <h3>📄 Document Preview</h3>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <button class="btn ba bsm" onclick="doPrint()">🖨️ Print</button>
+        <button class="btn bp bsm" onclick="doPDF()">⬇️ PDF</button>
+        <button class="btn bwa bsm" onclick="waShareDoc()">📲 WhatsApp</button>
+        <button class="mc" onclick="closeMo()">✕</button>
+      </div>
+    </div>
+    <div id="pc"></div>
+  </div>
+</div>
+
+<div class="lo" id="lo"><div class="sp"></div><div class="lt" id="lt">Connecting...</div></div>
+<div id="toast"></div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getDatabase,ref,set,onValue}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const FC={apiKey:"AIzaSyCrWcpY9kzFXUO8XrQpt2NzJaDWw9asn3c",authDomain:"irfan-rcc-pos.firebaseapp.com",databaseURL:"https://irfan-rcc-pos-default-rtdb.firebaseio.com",projectId:"irfan-rcc-pos",storageBucket:"irfan-rcc-pos.firebasestorage.app",messagingSenderId:"512241759208",appId:"1:512241759208:web:e2d2cdce1a2c926e4d6a5d"};
+const app=initializeApp(FC);const db=getDatabase(app);
+
+const CO={name:"Irfan RCC Pipe Factory",addr:"Lehtrar Road, Foji Camp Stop, Near Dr. Sadaf Hospital, Islamabad",p1:"M. Irfan: 0311-0514692",p2:"Zahid Khan: 0312-5487080",email:"info@irfanrccpipefactory.com",website:"www.irfanrccpipefactory.com",tag:"Quality Precast Concrete Products"};
+const TERMS=["Prices quoted are Ex-Factory and subject to change without prior notice.","This quotation is valid for 7 days from the date of issue.","Delivery within 3–7 working days after order confirmation.","Payment Terms: 50% advance payment required at the time of order confirmation. 25% payment required at the center/mid stage of production. Remaining 25% must be paid in full before delivery of material.","Transportation charges not included unless specifically mentioned.","Purchaser is responsible for unloading material at delivery site.","Any shortage or damage claim must be reported at time of delivery.","All products supplied as per agreed specifications and dimensions.","Taxes, if applicable, will be charged per government regulations.","Company reserves the right to revise prices after quotation validity expires."];
+
+let D={items:[],customers:[],suppliers:[],employees:[],invoices:[],quotations:[],expenses:[],returns:[],ledger:[],production:[],purchases:[],factoryPayments:[],settings:{inv:1000,quot:500,pur:1}};
+let CP=null,RC={iv:0,qt:0},isOnline=true;
+
+// OFFLINE
+window.addEventListener('online',()=>{isOnline=true;document.getElementById('offbar').style.display='none';document.getElementById('offbar2').style.display='none';setSS('ok','☁️ Connected ✅');saveAll();});
+window.addEventListener('offline',()=>{isOnline=false;document.getElementById('offbar').style.display='block';document.getElementById('offbar2').style.display='block';setSS('','📵 Offline');});
+
+function saveLocal(){try{localStorage.setItem('rcc_db',JSON.stringify(D));}catch(e){}}
+function loadLocal(){try{const d=localStorage.getItem('rcc_db');if(d){const p=JSON.parse(d);Object.keys(p).forEach(k=>{if(D[k]!==undefined)D[k]=p[k];});}}catch(e){}}
+
+showLo('Connecting to Firebase...');loadLocal();
+const dbRef=ref(db,'pos');
+onValue(dbRef,(snap)=>{
+  const v=snap.val();
+  if(v){['items','customers','suppliers','employees','invoices','quotations','expenses','returns','ledger','production','purchases','factoryPayments'].forEach(k=>{D[k]=v[k]?Object.values(v[k]):[];});D.settings=v.settings||{inv:1000,quot:500};saveLocal();}
+  hideLo();setSS('ok','☁️ Firebase Connected ✅');dashboard();refreshCur();
+},(e)=>{hideLo();setSS('','📵 Offline — Local Data');});
+
+function saveFB(path,data){if(!isOnline){saveLocal();return;}setSS('sy','⏳ Syncing...');set(ref(db,'pos/'+path),data).then(()=>{setSS('ok','☁️ Synced ✅');saveLocal();}).catch(()=>{setSS('','⚠️ Failed');saveLocal();});}
+function saveAll(){setSS('sy','⏳ Syncing...');const obj={settings:D.settings};['items','customers','suppliers','employees','invoices','quotations','expenses','returns','ledger','production','purchases','factoryPayments'].forEach(k=>{obj[k]=D[k].length?Object.fromEntries(D[k].map(i=>[i.id,i])):null;});set(ref(db,'pos'),obj).then(()=>{setSS('ok','☁️ Synced ✅');saveLocal();}).catch(()=>{setSS('','⚠️');saveLocal();});}
+window.manualSync=()=>{saveAll();toast('☁️ Syncing...','');};
+
+// NAV
+const TITLES={dashboard:'Dashboard / ڈیش بورڈ',items:'Items / اشیاء',inventory:'Inventory',customers:'Customers / گاہک',suppliers:'Suppliers / فیکٹریاں',employees:'Employees / ملازمین',invoice:'Invoice / رسید',quotation:'Quotation / کوٹیشن',expenses:'Expenses / اخراجات',returns:'Returns / واپسی',ledger:'Ledger / کھاتہ لین دین',production:'Production / پیداوار'};
+window.go=function(id){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  const pg=document.getElementById('page-'+id);if(pg)pg.classList.add('active');
+  document.querySelectorAll('.ni').forEach(n=>{if((n.getAttribute('onclick')||'').includes("'"+id+"'"))n.classList.add('active');});
+  document.getElementById('pt').textContent=TITLES[id]||id;
+  const today=new Date().toISOString().split('T')[0];
+  if(id==='invoice'){fillCD('iv3');initDoc('invoice');renderH('invoice');}
+  if(id==='quotation'){fillCD('qt4');initDoc('quotation');renderH('quotation');}
+  if(id==='returns'){fillCD('rt3');fillItemDrop();renderRets();}
+  if(id==='purchases'){fillPurSupDrop();fillPurItemDrop();renderPurchases();}
+  if(id==='ledger'){fillCD('led-c');fillCD('led-filter');renderLedger();}
+  if(id==='production'){fillProdItem();renderProd();renderProdSummary();}
+  if(id==='items')renderItems();if(id==='inventory')renderInv();
+  if(id==='customers')renderCusts();if(id==='suppliers')renderSupps();
+  if(id==='employees')renderEmps();if(id==='expenses'){renderExp();fillExpCats();}
+  if(id==='dashboard')dashboard();
+  document.getElementById('sb').classList.remove('open');
+};
+function refreshCur(){const a=document.querySelector('.pg.active');if(a)window.go(a.id.replace('page-',''));}
+window.toggleSB=function(){document.getElementById('sb').classList.toggle('open');};
+
+// ITEMS
+let editItemId=null;
+window.saveItem=function(){
+  const nm=g('in1');if(!nm){toast('❌ Name required','err');return;}
+  if(editItemId){
+    // UPDATE existing
+    const idx=D.items.findIndex(i=>i.id===editItemId);
+    if(idx!==-1){
+      D.items[idx]={id:editItemId,name:nm,cat:g('in2'),unit:g('in3'),buy:n('in4'),sale:n('in5'),qty:n('in6'),min:n('in7')||5,desc:g('in8')};
+      saveFB('items/'+editItemId,D.items[idx]);
+      toast('✅ Item updated!','ok');
+    }
+    editItemId=null;
+    document.getElementById('saveItemBtn').textContent='✅ Save Item';
+    document.getElementById('saveItemBtn').className='btn bp';
+    document.querySelector('.ct').textContent='🧱 Add Item / نئی چیز شامل کریں';
+  }else{
+    const it={id:'i'+Date.now(),name:nm,cat:g('in2'),unit:g('in3'),buy:n('in4'),sale:n('in5'),qty:n('in6'),min:n('in7')||5,desc:g('in8')};
+    D.items.push(it);saveFB('items/'+it.id,it);toast('✅ Item saved!','ok');
+  }
+  renderItems();clrItem();
+};
+window.editItem=function(id){
+  const it=D.items.find(i=>i.id===id);if(!it)return;
+  editItemId=id;
+  s('in1',it.name);
+  document.getElementById('in2').value=it.cat;
+  document.getElementById('in3').value=it.unit;
+  s('in4',it.buy);s('in5',it.sale);s('in6',it.qty);s('in7',it.min);s('in8',it.desc||'');
+  // Change button to Update
+  const btn=document.getElementById('saveItemBtn');
+  if(btn){btn.textContent='💾 Update Item';btn.className='btn ba';}
+  // Scroll to top of items form
+  document.getElementById('page-items').scrollIntoView({behavior:'smooth'});
+  toast('✏️ Editing: '+it.name,'');
+};
+window.delItem=function(id){if(!confirm('Delete?'))return;D.items=D.items.filter(i=>i.id!==id);saveFB('items/'+id,null);renderItems();};
+window.clrItem=function(){['in1','in4','in5','in6','in7','in8'].forEach(x=>s(x,''));};
+function renderItems(){const q=(g('is1')||'').toLowerCase();const rows=D.items.filter(i=>i.name.toLowerCase().includes(q)||i.cat.toLowerCase().includes(q));const tb=document.getElementById('itb');if(!tb)return;tb.innerHTML=rows.length?rows.map((it,i)=>`<tr><td>${i+1}</td><td><b>${it.name}</b></td><td>${it.cat}</td><td>${it.unit}</td><td>PKR ${f(it.buy)}</td><td><b>PKR ${f(it.sale)}</b></td><td><span class="badge ${it.qty<=it.min?'bre':'bgr'}">${it.qty}</span></td><td style="display:flex;gap:4px"><button class="btn bp bsm" onclick="editItem('${it.id}')">✏️</button><button class="btn bd bsm" onclick="delItem('${it.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center;color:#aaa;padding:16px">No items yet</td></tr>';}
+
+function renderInv(){const q=(g('ivs')||'').toLowerCase();const rows=D.items.filter(i=>i.name.toLowerCase().includes(q));const tb=document.getElementById('ivb');if(!tb)return;tb.innerHTML=rows.length?rows.map((it,i)=>{const val=it.qty*it.buy;const st=it.qty===0?'<span class="badge bre">Out of Stock</span>':it.qty<=it.min?'<span class="badge bye">Low Stock</span>':'<span class="badge bgr">In Stock</span>';return`<tr><td>${i+1}</td><td><b>${it.name}</b></td><td>${it.cat}</td><td><b>${it.qty}</b> ${it.unit}</td><td>${it.min}</td><td>PKR ${f(it.buy)}</td><td>PKR ${f(it.sale)}</td><td>PKR ${f(val)}</td><td>${st}</td></tr>`;}).join(''):'<tr><td colspan="9" style="text-align:center;color:#aaa;padding:16px">No items</td></tr>';}
+
+// CUSTOMERS
+function getCustBalance(cid){
+  const sales=D.invoices.filter(i=>i.cid===cid).reduce((s,i)=>s+(i.grand||0),0);
+  const paid=D.ledger.filter(l=>l.cid===cid&&(l.type==='payment'||l.type==='advance')).reduce((s,l)=>s+(l.amt||0),0);
+  const ret=D.ledger.filter(l=>l.cid===cid&&l.type==='return').reduce((s,l)=>s+(l.amt||0),0);
+  const ob=D.customers.find(c=>c.id===cid)?.ob||0;
+  return{sales:sales+ob,paid,ret,bal:sales+ob-paid-ret};
+}
+window.saveCust=function(){const nm=g('cn1');if(!nm){toast('❌ Name required','err');return;}const c={id:'c'+Date.now(),name:nm,phone:g('cn2'),addr:g('cn3'),city:g('cn4'),cnic:g('cn6'),ob:n('cn7')};D.customers.push(c);saveFB('customers/'+c.id,c);renderCusts();['cn1','cn2','cn3','cn4','cn6'].forEach(x=>s(x,''));s('cn7','');toast('✅ Customer saved!','ok');};
+window.delCust=function(id){if(!confirm('Delete?'))return;D.customers=D.customers.filter(c=>c.id!==id);saveFB('customers/'+id,null);renderCusts();};
+function renderCusts(){const q=(g('cs1')||'').toLowerCase();const rows=D.customers.filter(c=>c.name.toLowerCase().includes(q)||(c.phone||'').includes(q));const tb=document.getElementById('ctb');if(!tb)return;tb.innerHTML=rows.length?rows.map((c,i)=>{const bal=getCustBalance(c.id);return`<tr><td>${i+1}</td><td><b>${c.name}</b></td><td>${c.phone||'-'}</td><td>${c.city||'-'}</td><td>PKR ${f(bal.sales)}</td><td>PKR ${f(bal.paid)}</td><td><b style="color:${bal.bal>0?'var(--re)':'var(--gr)'}">${bal.bal>0?'PKR '+f(bal.bal)+' باقی':'✅ Clear'}</b></td><td style="display:flex;gap:4px"><button class="btn bp bsm" onclick="openEdit('customer','${c.id}')">✏️</button><button class="btn bd bsm" onclick="delCust('${c.id}')">🗑️</button></td></tr>`;}).join(''):'<tr><td colspan="8" style="text-align:center;color:#aaa;padding:16px">No customers</td></tr>';}
+function fillCD(sid){const sel=document.getElementById(sid);if(!sel)return;const cur=sel.value;sel.innerHTML='<option value="">-- Select --</option>';D.customers.forEach(c=>sel.innerHTML+=`<option value="${c.id}"${c.id===cur?' selected':''}>${c.name}${c.phone?' ('+c.phone+')':''}</option>`);}
+window.fillC=function(p){const cid=g(p==='iv'?'iv3':'qt4');const c=D.customers.find(x=>x.id===cid);s(p==='iv'?'iv4':'qt5',c?c.phone:'');s(p==='iv'?'iv5':'qt6',c?c.addr||'':'');};
+
+// LEDGER
+window.saveLed=function(){
+  const cid=g('led-c');if(!cid){toast('❌ Select customer','err');return;}
+  const amt=n('led-a');if(!amt){toast('❌ Enter amount','err');return;}
+  const l={id:'l'+Date.now(),cid,date:g('led-d'),type:g('led-t'),amt,desc:g('led-desc'),inv:g('led-inv')};
+  D.ledger.push(l);saveFB('ledger/'+l.id,l);
+  renderLedger();['led-a','led-desc','led-inv'].forEach(x=>s(x,''));toast('✅ Transaction saved!','ok');
+};
+window.delLed=function(id){if(!confirm('Delete?'))return;D.ledger=D.ledger.filter(l=>l.id!==id);saveFB('ledger/'+id,null);renderLedger();};
+function renderLedger(){
+  const filterCid=g('led-filter');
+  const tb=document.getElementById('led-tb');
+  const sumDiv=document.getElementById('led-summary');
+  let rows=D.ledger.filter(l=>!filterCid||l.cid===filterCid);
+  rows=rows.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  // Summary
+  if(filterCid){
+    const bal=getCustBalance(filterCid);
+    const c=D.customers.find(x=>x.id===filterCid);
+    if(sumDiv&&c)sumDiv.innerHTML=`<div class="led-card"><div class="led-name">📋 ${c.name}</div><div class="led-stats"><div class="led-stat"><div class="lv">PKR ${f(bal.sales)}</div><div class="ll">Total Sales</div></div><div class="led-stat"><div class="lv">PKR ${f(bal.paid)}</div><div class="ll">Total Paid</div></div><div class="led-stat" style="background:${bal.bal>0?'rgba(220,38,38,.3)':'rgba(22,163,74,.3)'}"><div class="lv">PKR ${f(bal.bal)}</div><div class="ll">${bal.bal>0?'باقی Balance':'✅ Clear'}</div></div></div></div>`;
+  }else{
+    if(sumDiv){const total=D.customers.reduce((s,c)=>{const b=getCustBalance(c.id);return s+(b.bal>0?b.bal:0);},0);sumDiv.innerHTML=`<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:7px;padding:10px 13px;margin-bottom:10px;font-size:13px;font-weight:700;color:#dc2626">💰 Total Receivable / کل باقی وصول: PKR ${f(total)}</div>`;}
+  }
+  if(!tb)return;
+  const typeColors={sale:'bbl',payment:'bgr',return:'bye',advance:'bor'};
+  tb.innerHTML=rows.length?rows.map(l=>{const c=D.customers.find(x=>x.id===l.cid);const tc=typeColors[l.type]||'bbl';return`<tr><td>${l.date||'-'}</td><td>${c?c.name:'-'}</td><td><span class="badge ${tc}">${l.type}</span></td><td><b>PKR ${f(l.amt)}</b></td><td>${l.desc||'-'}</td><td>${l.inv||'-'}</td><td><button class="btn bd bsm" onclick="delLed('${l.id}')">🗑️</button></td></tr>`;}).join(''):'<tr><td colspan="7" style="text-align:center;color:#aaa;padding:16px">No transactions yet</td></tr>';
+}
+
+// PRODUCTION
+function fillProdItem(){const sel=document.getElementById('pr-i');if(!sel)return;sel.innerHTML='<option value="">-- Select Item --</option>';D.items.forEach(it=>sel.innerHTML+=`<option value="${it.id}">${it.name}</option>`);}
+window.saveProd=function(){
+  const iid=g('pr-i');const item=D.items.find(i=>i.id===iid);
+  const qty=n('pr-q');if(!qty){toast('❌ Enter quantity','err');return;}
+  const p={id:'p'+Date.now(),date:g('pr-d'),iid,iname:item?item.name:'Unknown',qty,shift:g('pr-s'),workers:n('pr-w'),sup:g('pr-sup'),labour:n('pr-lc'),notes:g('pr-n')};
+  D.production.push(p);saveFB('production/'+p.id,p);renderProd();renderProdSummary();['pr-w','pr-sup','pr-lc','pr-n'].forEach(x=>s(x,''));s('pr-q','');toast('✅ Production saved!','ok');
+};
+window.delProd=function(id){if(!confirm('Delete?'))return;D.production=D.production.filter(p=>p.id!==id);saveFB('production/'+id,null);renderProd();renderProdSummary();};
+
+// PRODUCTION ITEM-WISE SUMMARY
+function renderProdSummary(){
+  const tb = document.getElementById('pr-summary-tb'); if(!tb)return;
+  // Group by item
+  const grouped = {};
+  D.production.forEach(p=>{
+    if(!grouped[p.iname]) grouped[p.iname]={name:p.iname, qty:0, labour:0, lastDate:''};
+    grouped[p.iname].qty += (p.qty||0);
+    grouped[p.iname].labour += (p.labour||0);
+    if(!grouped[p.iname].lastDate || p.date > grouped[p.iname].lastDate) grouped[p.iname].lastDate = p.date;
+  });
+  const rows = Object.values(grouped).sort((a,b)=>b.qty-a.qty);
+  tb.innerHTML = rows.length ? rows.map(r=>`
+    <tr>
+      <td><b>${r.name}</b></td>
+      <td><span class="badge bbl" style="font-size:13px;padding:4px 10px">${r.qty} pcs</span></td>
+      <td><b>PKR ${f(r.labour)}</b></td>
+      <td>${r.lastDate||'-'}</td>
+    </tr>`).join('') : '<tr><td colspan="4" style="text-align:center;color:#aaa;padding:14px">No production data</td></tr>';
+}
+
+function renderProd(){
+  const q=(g('pr-search')||'').toLowerCase();
+  const df=g('pr-df'),dt=g('pr-dt');
+  let rows=D.production.filter(p=>{const mq=p.iname.toLowerCase().includes(q)||(p.sup||'').toLowerCase().includes(q);const md=(!df||p.date>=df)&&(!dt||p.date<=dt);return mq&&md;});
+  rows=rows.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const tb=document.getElementById('pr-tb');if(!tb)return;
+  const totQty=rows.reduce((s,p)=>s+p.qty,0);const totLab=rows.reduce((s,p)=>s+(p.labour||0),0);
+  const td=document.getElementById('pr-total');if(td)td.innerHTML=`Total Units: <b>${totQty}</b> &nbsp;|&nbsp; Total Labour: <b>PKR ${f(totLab)}</b>`;
+  tb.innerHTML=rows.length?rows.map(p=>`<tr><td>${p.date}</td><td><b>${p.iname}</b></td><td><span class="badge bbl">${p.qty}</span></td><td>${p.shift}</td><td>${p.workers||'-'}</td><td>PKR ${f(p.labour)}</td><td>${p.sup||'-'}</td><td>${p.notes||'-'}</td><td style="display:flex;gap:4px"><button class="btn bp bsm" onclick="openEdit('production','${p.id}')">✏️</button><button class="btn bd bsm" onclick="delProd('${p.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="9" style="text-align:center;color:#aaa;padding:16px">No production records</td></tr>';
+}
+
+// SUPPLIERS/EMPLOYEES/EXPENSES (same as before)
+window.saveSupp=function(){const nm=g('su1');if(!nm){toast('❌ Required','err');return;}const su={id:'s'+Date.now(),name:nm,contact:g('su2'),phone:g('su3'),addr:g('su4'),city:g('su5'),type:g('su6')};D.suppliers.push(su);saveFB('suppliers/'+su.id,su);renderSupps();['su1','su2','su3','su4','su5'].forEach(x=>s(x,''));toast('✅ Saved!','ok');};
+window.delSupp=function(id){if(!confirm('Delete?'))return;D.suppliers=D.suppliers.filter(x=>x.id!==id);saveFB('suppliers/'+id,null);renderSupps();};
+function renderSupps(){const tb=document.getElementById('stb');if(!tb)return;tb.innerHTML=D.suppliers.length?D.suppliers.map((su,i)=>`<tr><td>${i+1}</td><td><b>${su.name}</b></td><td>${su.contact||'-'}</td><td>${su.phone||'-'}</td><td>${su.city||'-'}</td><td><span class="badge bbl">${su.type}</span></td><td style="display:flex;gap:4px"><button class="btn bp bsm" onclick="openEdit('supplier','${su.id}')">✏️</button><button class="btn bd bsm" onclick="delSupp('${su.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="7" style="text-align:center;color:#aaa;padding:16px">No suppliers</td></tr>';}
+window.saveEmp=function(){const nm=g('em1');if(!nm){toast('❌ Required','err');return;}const e={id:'e'+Date.now(),name:nm,cnic:g('em2'),phone:g('em3'),role:g('em4'),sal:n('em5'),join:g('em6'),addr:g('em7')};D.employees.push(e);saveFB('employees/'+e.id,e);renderEmps();['em1','em2','em3','em5','em7'].forEach(x=>s(x,''));toast('✅ Saved!','ok');};
+window.delEmp=function(id){if(!confirm('Delete?'))return;D.employees=D.employees.filter(x=>x.id!==id);saveFB('employees/'+id,null);renderEmps();};
+function renderEmps(){const tb=document.getElementById('etb');if(!tb)return;tb.innerHTML=D.employees.length?D.employees.map((e,i)=>`<tr><td>${i+1}</td><td><b>${e.name}</b></td><td>${e.cnic||'-'}</td><td>${e.phone||'-'}</td><td><span class="badge bbl">${e.role}</span></td><td>PKR ${f(e.sal)}</td><td>${e.join||'-'}</td><td style="display:flex;gap:4px"><button class="btn bp bsm" onclick="openEdit('employee','${e.id}')">✏️</button><button class="btn bd bsm" onclick="delEmp('${e.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center;color:#aaa;padding:16px">No employees</td></tr>';}
+window.saveExp=function(){const amt=n('ex4');if(!amt){toast('❌ Amount required','err');return;}const e={id:'x'+Date.now(),date:g('ex1'),cat:g('ex2'),desc:g('ex3'),amt,paid:g('ex5'),meth:g('ex6')};D.expenses.push(e);saveFB('expenses/'+e.id,e);renderExp();['ex3','ex5'].forEach(x=>s(x,''));s('ex4','');toast('✅ Saved!','ok');};
+window.delExp=function(id){if(!confirm('Delete?'))return;D.expenses=D.expenses.filter(x=>x.id!==id);saveFB('expenses/'+id,null);renderExp();};
+function fillExpCats(){const sel=document.getElementById('exf');if(!sel)return;const cats=[...new Set(D.expenses.map(e=>e.cat))];sel.innerHTML='<option value="">All</option>';cats.forEach(c=>sel.innerHTML+=`<option>${c}</option>`);}
+function renderExp(){const q=(g('exs')||'').toLowerCase(),cat=g('exf')||'';const rows=D.expenses.filter(e=>((e.desc||'').toLowerCase().includes(q)||(e.cat||'').toLowerCase().includes(q))&&(!cat||e.cat===cat));const tb=document.getElementById('extb');if(!tb)return;const tot=rows.reduce((s,e)=>s+(e.amt||0),0);const td=document.getElementById('ext');if(td)td.textContent='Total: PKR '+f(tot);tb.innerHTML=rows.length?rows.map(e=>`<tr><td>${e.date||'-'}</td><td><span class="badge bye">${e.cat}</span></td><td>${e.desc||'-'}</td><td><b>PKR ${f(e.amt)}</b></td><td>${e.paid||'-'}</td><td>${e.meth}</td><td><button class="btn bd bsm" onclick="delExp('${e.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="7" style="text-align:center;color:#aaa;padding:16px">No expenses</td></tr>';}
+
+// INVOICE/QUOTATION
+function initDoc(type){const p=type==='invoice'?'iv':'qt',today=new Date().toISOString().split('T')[0];if(type==='invoice'){s('iv1','INV-'+D.settings.inv);s('iv2',today);}else{s('qt1','QUOT-'+D.settings.quot);s('qt2',today);const vd=new Date();vd.setDate(vd.getDate()+7);s('qt3',vd.toISOString().split('T')[0]);}const tb=document.getElementById(p+'r');if(tb&&!tb.children.length)addR(p);}
+window.addR=function(p){RC[p]++;const idx=RC[p];const opts=D.items.map(it=>`<option value="${it.id}" data-rate="${it.sale}">${it.name} — PKR ${f(it.sale)}/${it.unit}</option>`).join('');const tr=document.createElement('tr');tr.id=p+'-r-'+idx;tr.innerHTML=`<td>${idx}</td><td><select style="min-width:130px;font-size:11px" onchange="autoR(this,'${p}',${idx})"><option value="">--Item--</option>${opts}</select></td><td><input id="${p}dc${idx}" placeholder="Desc" style="width:90px"/></td><td><input type="number" id="${p}q${idx}" value="1" min="0" step="0.1" oninput="calc('${p}')" style="width:50px"/></td><td><input type="number" id="${p}r${idx}" value="0" oninput="calc('${p}')" style="width:75px"/></td><td id="${p}t${idx}" style="font-weight:700;white-space:nowrap">PKR 0</td><td><button onclick="remR('${p}',${idx})" style="background:none;border:none;cursor:pointer;color:var(--re);font-size:16px;padding:2px 5px">✕</button></td>`;document.getElementById(p+'r').appendChild(tr);};
+window.remR=function(p,idx){const r=document.getElementById(p+'-r-'+idx);if(r)r.remove();calc(p);};
+window.autoR=function(sel,p,idx){const o=sel.options[sel.selectedIndex];const rate=o?parseFloat(o.getAttribute('data-rate'))||0:0;const ri=document.getElementById(p+'r'+idx);if(ri)ri.value=rate;calc(p);};
+window.calc=function(p){
+  const tb=document.getElementById(p+'r');if(!tb)return;let sub=0;
+  tb.querySelectorAll('tr').forEach(tr=>{const id=tr.id?tr.id.split('-r-').pop():null;if(!id)return;const q=parseFloat(document.getElementById(p+'q'+id)?.value)||0;const r=parseFloat(document.getElementById(p+'r'+id)?.value)||0;const t=q*r;const el=document.getElementById(p+'t'+id);if(el)el.textContent='PKR '+f(t);sub+=t;});
+  const labour=parseFloat(document.getElementById(p+'l')?.value)||0;
+  const rent=parseFloat(document.getElementById(p+'rent')?.value)||0;
+  const d=parseFloat(document.getElementById(p+'d')?.value)||0,tx=parseFloat(document.getElementById(p+'t')?.value)||0;
+  const sw=sub+labour+rent,da=sw*d/100,af=sw-da,ta=af*tx/100,gr=af+ta;
+  st(p+'s1','PKR '+f(sub));st(p+'l2','PKR '+f(labour));st(p+'rent2','PKR '+f(rent));
+  st(p+'d2','-PKR '+f(da));st(p+'t2','+PKR '+f(ta));st(p+'g','PKR '+f(gr));
+  return{sub,labour,rent,da,ta,gr,d,tx,sw};
+};
+function getRows(p){const tb=document.getElementById(p+'r');if(!tb)return[];const rows=[];tb.querySelectorAll('tr').forEach(tr=>{const id=tr.id?tr.id.split('-r-').pop():null;if(!id)return;const sel=tr.querySelector('select');const nm=sel?sel.options[sel.selectedIndex]?.text.split(' — PKR')[0]:'';const dc=document.getElementById(p+'dc'+id)?.value||'';const q=parseFloat(document.getElementById(p+'q'+id)?.value)||0;const r=parseFloat(document.getElementById(p+'r'+id)?.value)||0;if(q&&r)rows.push({name:nm,desc:dc,qty:q,rate:r,total:q*r});});return rows;}
+window.saveDoc=function(type){
+  const p=type==='invoice'?'iv':'qt';
+  const cid=g(p==='iv'?'iv3':'qt4');const cust=D.customers.find(c=>c.id===cid);
+  const items=getRows(p);if(!items.length){toast('❌ Add at least one item','err');return;}
+  const tots=calc(p);const grand=tots.gr;
+  const doc={id:'d'+Date.now(),num:g(p+'1'),date:g(p+'2'),cid,cname:cust?cust.name:'Walk-in',cphone:g(p==='iv'?'iv4':'qt5'),caddr:g(p==='iv'?'iv5':'qt6'),items,...tots,grand,notes:g(p==='iv'?'ivn':'qtn')};
+  if(type==='quotation'){doc.valid=g('qt3');}
+  if(type==='invoice'){
+    doc.pay=g('iv6');D.invoices.push(doc);D.settings.inv++;
+    saveFB('invoices/'+doc.id,doc);
+    // Auto add to ledger if sale
+    if(cid){const led={id:'l'+Date.now(),cid,date:doc.date,type:'sale',amt:grand,desc:'Invoice '+doc.num,inv:doc.num};D.ledger.push(led);saveFB('ledger/'+led.id,led);}
+  }else{D.quotations.push(doc);D.settings.quot++;saveFB('quotations/'+doc.id,doc);}
+  saveFB('settings',D.settings);renderH(type);toast('✅ '+type+' saved!','ok');
+};
+window.resetDoc=function(type){const p=type==='invoice'?'iv':'qt';document.getElementById(p+'r').innerHTML='';RC[p]=0;initDoc(type);calc(p);};
+window.delDoc=function(type,id){if(!confirm('Delete?'))return;if(type==='invoice')D.invoices=D.invoices.filter(d=>d.id!==id);else D.quotations=D.quotations.filter(d=>d.id!==id);saveFB((type==='invoice'?'invoices':'quotations')+'/'+id,null);renderH(type);};
+function renderH(type){
+  if(type==='invoice'){const tb=document.getElementById('ivhb');if(!tb)return;const q=(g('ivhs')||'').toLowerCase();const rows=D.invoices.filter(d=>(d.num||'').toLowerCase().includes(q)||(d.cname||'').toLowerCase().includes(q));tb.innerHTML=rows.length?rows.slice().reverse().map(d=>`<tr><td><b>${d.num}</b></td><td>${d.date}</td><td>${d.cname}</td><td><b>PKR ${f(d.grand)}</b></td><td><span class="badge bbl">${d.pay||'Cash'}</span></td><td style="display:flex;gap:4px;flex-wrap:wrap"><button class="btn bp bsm" onclick='prevSaved(${JSON.stringify(d).replace(/'/g,"&#39;")},"invoice")'>👁️</button><button class="btn bwa bsm" onclick='waSavedShare(${JSON.stringify(d).replace(/'/g,"&#39;")},"invoice")'>📲</button><button class="btn bd bsm" onclick="delDoc('invoice','${d.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:#aaa;padding:16px">No invoices</td></tr>';}
+  else{const tb=document.getElementById('qthb');if(!tb)return;tb.innerHTML=D.quotations.length?D.quotations.slice().reverse().map(d=>`<tr><td><b>${d.num}</b></td><td>${d.date}</td><td>${d.cname}</td><td><b>PKR ${f(d.grand)}</b></td><td>${d.valid||'-'}</td><td style="display:flex;gap:4px;flex-wrap:wrap"><button class="btn bp bsm" onclick='prevSaved(${JSON.stringify(d).replace(/'/g,"&#39;")},"quotation")'>👁️</button><button class="btn bwa bsm" onclick='waSavedShare(${JSON.stringify(d).replace(/'/g,"&#39;")},"quotation")'>📲</button><button class="btn bd bsm" onclick="delDoc('quotation','${d.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:#aaa;padding:16px">No quotations</td></tr>';}
+}
+
+// RETURNS
+function fillItemDrop(){const sel=document.getElementById('rt4');if(!sel)return;sel.innerHTML='<option value="">-- Select --</option>';D.items.forEach(it=>sel.innerHTML+=`<option value="${it.id}">${it.name}</option>`);}
+window.saveRet=function(){const cid=g('rt3');const c=D.customers.find(x=>x.id===cid);const iid=g('rt4');const item=D.items.find(i=>i.id===iid);const r={id:'r'+Date.now(),date:g('rt1'),inv:g('rt2'),cname:c?c.name:'-',iname:item?item.name:'-',qty:n('rt5'),reason:g('rt6'),refund:n('rt7'),status:g('rt8')};D.returns.push(r);saveFB('returns/'+r.id,r);renderRets();toast('✅ Saved!','ok');};
+window.delRet=function(id){if(!confirm('Delete?'))return;D.returns=D.returns.filter(r=>r.id!==id);saveFB('returns/'+id,null);renderRets();};
+function renderRets(){const tb=document.getElementById('rttb');if(!tb)return;tb.innerHTML=D.returns.length?D.returns.slice().reverse().map(r=>{const sc=r.status==='Approved'?'bgr':r.status==='Rejected'?'bre':'bye';return`<tr><td>${r.date||'-'}</td><td>${r.inv||'-'}</td><td>${r.cname}</td><td>${r.iname}</td><td>${r.qty}</td><td>PKR ${f(r.refund)}</td><td>${r.reason}</td><td><span class="badge ${sc}">${r.status}</span></td><td><button class="btn bd bsm" onclick="delRet('${r.id}')">🗑️</button></td></tr>`;}).join(''):'<tr><td colspan="9" style="text-align:center;color:#aaa;padding:16px">No returns</td></tr>';}
+
+// DASHBOARD
+function dashboard(){
+  const today=new Date().toISOString().split('T')[0],month=today.substring(0,7);
+  st('s1','PKR '+f(D.invoices.filter(i=>i.date===today).reduce((s,i)=>s+(i.grand||0),0)));
+  st('s2','PKR '+f(D.invoices.filter(i=>i.date&&i.date.startsWith(month)).reduce((s,i)=>s+(i.grand||0),0)));
+  st('s3',D.customers.length);
+  st('s4','PKR '+f(D.expenses.filter(e=>e.date&&e.date.startsWith(month)).reduce((s,e)=>s+(e.amt||0),0)));
+  const totalRec=D.customers.reduce((s,c)=>{const b=getCustBalance(c.id);return s+(b.bal>0?b.bal:0);},0);
+  st('s7','PKR '+f(totalRec));
+  const todayProd=D.production.filter(p=>p.date===today).reduce((s,p)=>s+p.qty,0);
+  st('s8',todayProd);
+  const d1=document.getElementById('d1');if(d1){const r=D.invoices.slice(-5).reverse();d1.innerHTML=r.length?r.map(i=>`<tr><td><b>${i.num}</b></td><td>${i.cname}</td><td>PKR ${f(i.grand)}</td><td><span class="badge bbl">${i.pay||'Cash'}</span></td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;color:#aaa;padding:14px">No invoices yet</td></tr>';}
+  const d2=document.getElementById('d2');if(d2){const low=D.items.filter(i=>i.qty<=i.min);d2.innerHTML=low.length?low.map(i=>`<tr><td>${i.name}</td><td><span class="badge bre">${i.qty}</span></td><td>${i.min}</td></tr>`).join(''):'<tr><td colspan="3" style="text-align:center;color:#22c55e;padding:14px">✅ All stock OK</td></tr>';}
+  const d3=document.getElementById('d3');if(d3){const pending=D.customers.map(c=>{const b=getCustBalance(c.id);return{...c,...b};}).filter(c=>c.bal>0).sort((a,b)=>b.bal-a.bal).slice(0,5);d3.innerHTML=pending.length?pending.map(c=>`<tr><td><b>${c.name}</b></td><td>PKR ${f(c.sales)}</td><td>PKR ${f(c.paid)}</td><td><b style="color:var(--re)">PKR ${f(c.bal)}</b></td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;color:#22c55e;padding:14px">✅ No pending payments</td></tr>';}
+  const d4=document.getElementById('d4');if(d4){const r=D.production.slice(-5).reverse();d4.innerHTML=r.length?r.map(p=>`<tr><td>${p.date}</td><td>${p.iname}</td><td><span class="badge bbl">${p.qty}</span></td><td>${p.shift}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;color:#aaa;padding:14px">No production records</td></tr>';}
+}
+
+// DOCUMENT BUILDER
+function buildDoc(doc,type){
+  const isInv=type==='invoice';
+  const rows=doc.items.map((it,i)=>`<tr><td style="text-align:center;color:#666;font-size:11px">${i+1}</td><td><b>${it.name||it.itemName||''}</b>${(it.desc||it.description)?`<br><small style="color:#888;font-size:9.5px">${it.desc||it.description}</small>`:''}</td><td style="text-align:center">${it.qty}</td><td style="text-align:right">PKR ${f(it.rate)}</td><td style="text-align:right;font-weight:700">PKR ${f(it.total)}</td></tr>`).join('');
+  const labour=doc.labour||0,rent=doc.rent||0,da=doc.da||0,ta=doc.ta||0;
+  return`<div class="pdoc" id="pa">
+  <div class="dph">
+    <div class="dph-l">
+      <div class="dn">🏭 ${CO.name}</div>
+      <div class="dt">${CO.tag}</div>
+      <div class="di">
+        📍 ${CO.addr}<br>
+        📞 ${CO.p1} &nbsp; 📞 ${CO.p2}<br>
+        ✉️ ${CO.email} | 🌐 ${CO.website}
+      </div>
+    </div>
+    <div class="dph-r">
+      <div class="dtype">${isInv?'INVOICE':'QUOTATION'}</div>
+      <div class="dtype2">${isInv?'رسید':'کوٹیشن'}</div>
+      <div class="dmeta">
+        <b>No:</b> ${doc.num}<br>
+        <b>Date:</b> ${doc.date}<br>
+        ${isInv?`<b>Payment:</b> ${doc.pay||doc.payment||'Cash'}`:`<b>Valid Until:</b> ${doc.valid||doc.validUntil||'-'}`}
+      </div>
+    </div>
+  </div>
+  <div class="dbar"></div>
+  <div class="dbody">
+    <div class="dparties">
+      <div class="dparty bill">
+        <div class="dpl">📋 Bill To / گاہک</div>
+        <div class="dpn">${doc.cname||'Walk-in Customer'}</div>
+        <div class="dpi">${doc.cphone?'📞 '+doc.cphone+'<br>':''}${doc.caddr?'📍 '+doc.caddr:''}</div>
+      </div>
+      <div class="dparty from">
+        <div class="dpl">🏭 Supplied By / فروخت کنندہ</div>
+        <div class="dpn">${CO.name}</div>
+        <div class="dpi">📞 ${CO.p1}<br>📞 ${CO.p2}<br>📍 ${CO.addr}</div>
+      </div>
+    </div>
+    <div class="dititle">📦 Items / اشیاء کی تفصیل</div>
+    <table class="dptbl">
+      <thead><tr><th style="width:30px;text-align:center">#</th><th>Item / Description</th><th style="text-align:center;width:55px">Qty</th><th style="text-align:right;width:95px">Rate PKR</th><th style="text-align:right;width:105px">Total PKR</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="dtots">
+      <div class="dtbox">
+        <div class="dtr"><span>Subtotal / ذیلی کل</span><span>PKR ${f(doc.sub)}</span></div>
+        ${labour>0?`<div class="dtr"><span>Labour / مزدوری</span><span>+ PKR ${f(labour)}</span></div>`:''}
+        ${rent>0?`<div class="dtr"><span>Rent / کرایہ</span><span>+ PKR ${f(rent)}</span></div>`:''}
+        ${da>0?`<div class="dtr" style="color:var(--gr)"><span>Discount (${doc.d||0}%)</span><span>- PKR ${f(da)}</span></div>`:''}
+        ${ta>0?`<div class="dtr" style="color:var(--ye)"><span>Tax (${doc.tx||0}%)</span><span>+ PKR ${f(ta)}</span></div>`:''}
+        <div class="dtf"><span>Grand Total / کل رقم</span><span>PKR ${f(doc.grand)}</span></div>
+      </div>
+    </div>
+    ${isInv?`<div class="dpay">💳 <b>Payment / ادائیگی:</b> ${doc.pay||doc.payment||'Cash'} &nbsp;&nbsp; <b>Amount / رقم:</b> PKR ${f(doc.grand)}</div>`:''}
+    ${doc.notes?`<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:9px 12px;margin-bottom:12px;font-size:11px"><b>📝 Notes:</b> ${doc.notes}</div>`:''}
+    <div class="dterms">
+      <div class="dtitle2">📜 Terms & Conditions / شرائط و ضوابط</div>
+      <ul class="dlist">${TERMS.map(t=>`<li>${t}</li>`).join('')}</ul>
+    </div>
+    <div class="dsigs">
+      <div class="dsig"><div class="dsigt">Authorized Signatory / مجاز دستخط</div>${CO.name}</div>
+      <div class="dsig"><div class="dsigt">Customer Signature / گاہک دستخط</div>${doc.cname||''}</div>
+    </div>
+  </div>
+  <div class="dfoot"><b>${CO.name}</b> | ${CO.addr}<br>📞 ${CO.p1} | 📞 ${CO.p2} | ✉️ ${CO.email} | 🌐 ${CO.website}<br><span style="font-size:9.5px;opacity:.6">Thank you for your business! | آپ کے کاروبار کا شکریہ</span></div>
+</div>`;
+}
+
+window.prevDoc=function(type){
+  const p=type==='invoice'?'iv':'qt';
+  const cid=g(p==='iv'?'iv3':'qt4');const cust=D.customers.find(c=>c.id===cid);
+  const items=getRows(p);if(!items.length){toast('❌ Add items first','err');return;}
+  const tots=calc(p);
+  const doc={num:g(p+'1'),date:g(p+'2'),cname:cust?cust.name:'Walk-in',cphone:g(p==='iv'?'iv4':'qt5'),caddr:g(p==='iv'?'iv5':'qt6'),items,...tots,grand:tots.gr,notes:g(p==='iv'?'ivn':'qtn'),pay:type==='invoice'?g('iv6'):'',valid:type==='quotation'?g('qt3'):''};
+  CP={doc,type};document.getElementById('pc').innerHTML=buildDoc(doc,type);document.getElementById('pmo').classList.add('open');
+};
+window.prevSaved=function(doc,type){CP={doc,type};document.getElementById('pc').innerHTML=buildDoc(doc,type);document.getElementById('pmo').classList.add('open');};
+window.closeMo=function(){document.getElementById('pmo').classList.remove('open');};
+
+// PRINT
+window.doPrint=function(){
+  const a=document.getElementById('pa');const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Print</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:'Segoe UI',Arial,sans-serif;}.pdoc{max-width:100%;}.dph{background:linear-gradient(135deg,#0f2540,#1e4476);padding:16px 20px 12px;display:grid;grid-template-columns:1fr auto;gap:12px;}.dph-l .dn{font-size:18px;font-weight:900;color:#fff;}.dph-l .dt{font-size:9px;color:rgba(255,255,255,.55);margin-top:1px;font-style:italic;}.dph-l .di{margin-top:8px;font-size:9px;color:rgba(255,255,255,.78);line-height:1.9;}.dph-r .dtype{font-size:23px;font-weight:900;color:#fff;text-align:right;}.dph-r .dtype2{font-size:12px;color:rgba(255,255,255,.65);text-align:right;direction:rtl;}.dph-r .dmeta{margin-top:7px;font-size:9.5px;color:rgba(255,255,255,.72);text-align:right;line-height:1.9;}.dph-r .dmeta b{color:#fff;}.dbar{height:4px;background:linear-gradient(90deg,#c8870a,#f0b03a,#c8870a);}.dbody{padding:15px 18px;}.dparties{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:13px;}.dparty{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:9px 11px;}.dparty.bill{border-left:3px solid #c8870a;}.dparty.from{border-left:3px solid #1a3c5e;}.dpl{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7a8d;margin-bottom:4px;}.dpn{font-size:12px;font-weight:700;color:#1a3c5e;margin-bottom:2px;}.dpi{font-size:10px;color:#555;line-height:1.7;}.dititle{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6b7a8d;margin-bottom:5px;padding-bottom:3px;border-bottom:2px solid #1a3c5e;}.dptbl{width:100%;border-collapse:collapse;font-size:10.5px;margin-bottom:12px;}.dptbl thead tr{background:#1a3c5e;}.dptbl th{color:#fff;padding:7px 9px;text-align:left;font-size:9.5px;font-weight:600;}.dptbl tbody tr:nth-child(even){background:#f8fafc;}.dptbl td{padding:7px 9px;border-bottom:1px solid #eaecef;}.dtots{display:flex;justify-content:flex-end;margin-bottom:12px;}.dtbox{width:255px;border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;}.dtr{display:flex;justify-content:space-between;padding:5px 11px;font-size:10.5px;border-bottom:1px solid #eaecef;}.dtf{display:flex;justify-content:space-between;padding:8px 11px;font-size:14px;font-weight:800;background:#1a3c5e;color:#fff;}.dpay{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:5px;padding:8px 11px;margin-bottom:11px;font-size:10px;color:#166534;}.dterms{background:#fafafa;border:1px solid #e5e7eb;border-radius:6px;padding:10px 12px;margin-bottom:11px;}.dtitle2{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#1a3c5e;margin-bottom:6px;}.dlist{list-style:none;padding:0;}.dlist li{font-size:9px;color:#555;line-height:1.6;padding:2px 0 2px 12px;position:relative;border-bottom:1px dashed #e5e7eb;}.dlist li:last-child{border-bottom:none;}.dlist li::before{content:"✓";position:absolute;left:0;color:#c8870a;font-weight:700;}.dsigs{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:11px;}.dsig{border-top:1.5px solid #1a3c5e;padding-top:5px;font-size:9.5px;color:#6b7a8d;text-align:center;}.dsigt{font-weight:600;color:#1a3c5e;margin-bottom:16px;}.dfoot{background:linear-gradient(135deg,#0f2540,#1e4476);color:rgba(255,255,255,.72);text-align:center;padding:9px;font-size:9.5px;line-height:1.8;}.dfoot b{color:#fff;}</style></head><body>${a.outerHTML}
+<!-- UNIVERSAL EDIT MODAL -->
+<div class="mo" id="editModal">
+  <div class="md" style="max-width:500px">
+    <div class="mh">
+      <h3 id="editModalTitle">✏️ Edit</h3>
+      <button class="mc" onclick="closeEditModal()">✕</button>
+    </div>
+    <div id="editModalBody"></div>
+    <div class="br2" style="margin-top:14px">
+      <button class="btn ba" id="editSaveBtn" onclick="saveEdit()">💾 Update</button>
+      <button class="btn bo2" onclick="closeEditModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+</body></html>`);
+  w.document.close();setTimeout(()=>w.print(),500);
+};
+
+// PDF
+window.doPDF=function(){
+  if(!window.jspdf){toast('PDF loading...','err');return;}
+  const{jsPDF}=window.jspdf;const jd=new jsPDF('p','mm','a4');const pd=CP.doc;const isInv=CP.type==='invoice';
+  jd.setFillColor(15,37,64);jd.rect(0,0,210,42,'F');
+  jd.setFillColor(200,135,10);jd.rect(0,42,210,3,'F');
+  jd.setTextColor(255,255,255);jd.setFontSize(15);jd.setFont('helvetica','bold');
+  jd.text(CO.name,12,14);
+  jd.setFontSize(7.5);jd.setFont('helvetica','italic');jd.text(CO.tag,12,18.5);
+  jd.setFont('helvetica','normal');jd.setTextColor(200,210,220);
+  jd.text(CO.addr,12,24);jd.text(CO.p1+' | '+CO.p2,12,29);jd.text(CO.email,12,34);
+  jd.setTextColor(255,255,255);jd.setFontSize(19);jd.setFont('helvetica','bold');
+  jd.text(isInv?'INVOICE':'QUOTATION',198,15,{align:'right'});
+  jd.setFontSize(7.5);jd.setFont('helvetica','normal');jd.setTextColor(180,195,210);
+  jd.text('No: '+pd.num,198,21,{align:'right'});
+  jd.text('Date: '+pd.date,198,26,{align:'right'});
+  jd.text((isInv?'Payment: '+(pd.pay||pd.payment||'Cash'):'Valid Until: '+(pd.valid||pd.validUntil||'-')),198,31,{align:'right'});
+  // Parties
+  jd.setFillColor(248,250,252);jd.roundedRect(10,47,90,30,2,2,'F');
+  jd.setFillColor(248,250,252);jd.roundedRect(108,47,92,30,2,2,'F');
+  jd.setDrawColor(200,135,10);jd.setLineWidth(0.6);jd.line(10,47,10,77);
+  jd.setDrawColor(26,60,94);jd.line(108,47,108,77);
+  jd.setTextColor(100,110,130);jd.setFontSize(7);jd.setFont('helvetica','bold');
+  jd.text('BILL TO / گاہک',13,53);jd.text('SUPPLIED BY',111,53);
+  jd.setTextColor(26,60,94);jd.setFontSize(8.5);jd.setFont('helvetica','bold');
+  jd.text((pd.cname||'Walk-in').substring(0,35),13,59);jd.text(CO.name,111,59);
+  jd.setTextColor(80,80,80);jd.setFontSize(7);jd.setFont('helvetica','normal');
+  if(pd.cphone)jd.text(pd.cphone,13,64);
+  if(pd.caddr)jd.text((pd.caddr||'').substring(0,42),13,69);
+  jd.text(CO.p1,111,64);jd.text(CO.p2,111,69);jd.text(CO.addr.substring(0,42),111,74);
+  // Items table
+  jd.autoTable({head:[['#','Item / Description','Qty','Rate PKR','Total PKR']],body:pd.items.map((it,i)=>[i+1,(it.name||it.itemName||'')+(it.desc?' — '+it.desc:''),it.qty,'PKR '+f(it.rate),'PKR '+f(it.total)]),startY:81,headStyles:{fillColor:[26,60,94],fontSize:8,fontStyle:'bold'},bodyStyles:{fontSize:8},alternateRowStyles:{fillColor:[248,250,252]},columnStyles:{0:{cellWidth:8,halign:'center'},2:{cellWidth:14,halign:'center'},3:{cellWidth:26,halign:'right'},4:{cellWidth:26,halign:'right'}},margin:{left:10,right:10}});
+  let y=jd.lastAutoTable.finalY+5;
+  // Totals
+  const labour=pd.labour||0,rent=pd.rent||0,da=pd.da||0,ta=pd.ta||0;
+  let totH=10;if(labour>0)totH+=6;if(rent>0)totH+=6;if(da>0)totH+=6;if(ta>0)totH+=6;
+  jd.setFillColor(241,245,249);jd.rect(120,y,80,totH,'F');
+  jd.setTextColor(80,80,80);jd.setFontSize(8);let ty=y+6;
+  jd.text('Subtotal:',122,ty);jd.text('PKR '+f(pd.sub),198,ty,{align:'right'});ty+=6;
+  if(labour>0){jd.text('Labour / مزدوری:',122,ty);jd.text('+ PKR '+f(labour),198,ty,{align:'right'});ty+=6;}
+  if(rent>0){jd.text('Rent / کرایہ:',122,ty);jd.text('+ PKR '+f(rent),198,ty,{align:'right'});ty+=6;}
+  if(da>0){jd.text('Discount:',122,ty);jd.text('- PKR '+f(da),198,ty,{align:'right'});ty+=6;}
+  if(ta>0){jd.text('Tax:',122,ty);jd.text('+ PKR '+f(ta),198,ty,{align:'right'});ty+=6;}
+  jd.setFillColor(26,60,94);jd.rect(120,ty,80,10,'F');
+  jd.setTextColor(255,255,255);jd.setFontSize(10);jd.setFont('helvetica','bold');
+  jd.text('Grand Total:',122,ty+7);jd.text('PKR '+f(pd.grand),198,ty+7,{align:'right'});
+  y=ty+16;
+  if(y>240){jd.addPage();y=15;}
+  // Terms
+  jd.setFillColor(250,250,250);jd.roundedRect(10,y,190,56,2,2,'F');
+  jd.setTextColor(26,60,94);jd.setFontSize(8);jd.setFont('helvetica','bold');
+  jd.text('TERMS & CONDITIONS / شرائط و ضوابط',13,y+7);
+  jd.setFont('helvetica','normal');jd.setTextColor(80,80,80);jd.setFontSize(7);
+  let yt=y+13;TERMS.forEach((t,i)=>{jd.text('✓  '+(i+1)+'. '+t,13,yt,{maxWidth:184});yt+=5;});
+  y+=62;
+  if(y>265){jd.addPage();y=15;}
+  jd.setDrawColor(26,60,94);jd.setLineWidth(0.4);
+  jd.line(15,y+20,85,y+20);jd.line(125,y+20,195,y+20);
+  jd.setTextColor(80,80,80);jd.setFontSize(7.5);
+  jd.text('Authorized Signatory',15,y+25);jd.text('Customer Signature',125,y+25);
+  jd.text(CO.name,15,y+30);jd.text(pd.cname||'',125,y+30);
+  y+=38;
+  jd.setFillColor(15,37,64);jd.rect(0,y,210,20,'F');
+  jd.setTextColor(200,210,220);jd.setFontSize(7.5);jd.setFont('helvetica','normal');
+  jd.text(CO.name+' | '+CO.addr,105,y+7,{align:'center'});
+  jd.text(CO.p1+' | '+CO.p2+' | '+CO.email+' | '+CO.website,105,y+13,{align:'center'});
+  jd.save((isInv?'Invoice':'Quotation')+'-'+pd.num+'.pdf');
+};
+
+// WHATSAPP SHARE
+function buildWAText(doc,type){
+  const isInv=type==='invoice';
+  let txt=`*${CO.name}*\n`;
+  txt+=`📍 ${CO.addr}\n`;
+  txt+=`📞 ${CO.p1} | ${CO.p2}\n\n`;
+  txt+=`*${isInv?'INVOICE / رسید':'QUOTATION / کوٹیشن'}*\n`;
+  txt+=`No: *${doc.num}*\n`;
+  txt+=`Date: ${doc.date}\n`;
+  if(doc.cname)txt+=`Customer: *${doc.cname}*\n`;
+  txt+=`\n*Items / اشیاء:*\n`;
+  doc.items.forEach((it,i)=>{txt+=`${i+1}. ${it.name||it.itemName} × ${it.qty} @ PKR ${f(it.rate)} = *PKR ${f(it.total)}*\n`;});
+  txt+=`\n`;
+  if((doc.labour||0)>0)txt+=`Labour: PKR ${f(doc.labour)}\n`;
+  if((doc.rent||0)>0)txt+=`Rent: PKR ${f(doc.rent)}\n`;
+  if((doc.da||0)>0)txt+=`Discount: -PKR ${f(doc.da)}\n`;
+  txt+=`\n💰 *Grand Total: PKR ${f(doc.grand)}*\n`;
+  if(isInv)txt+=`Payment: ${doc.pay||doc.payment||'Cash'}\n`;
+  if(doc.notes)txt+=`\nNote: ${doc.notes}\n`;
+  txt+=`\n_Thank you for your business!_\n_آپ کے کاروبار کا شکریہ_`;
+  return encodeURIComponent(txt);
+}
+window.waShare=function(type){
+  const p=type==='invoice'?'iv':'qt';
+  const cid=g(p==='iv'?'iv3':'qt4');const cust=D.customers.find(c=>c.id===cid);
+  const items=getRows(p);if(!items.length){toast('❌ Add items first','err');return;}
+  const tots=calc(p);
+  const doc={num:g(p+'1'),date:g(p+'2'),cname:cust?cust.name:'Walk-in',cphone:g(p==='iv'?'iv4':'qt5'),caddr:g(p==='iv'?'iv5':'qt6'),items,...tots,grand:tots.gr,notes:g(p==='iv'?'ivn':'qtn'),pay:type==='invoice'?g('iv6'):'',valid:type==='quotation'?g('qt3'):'',labour:tots.labour,rent:tots.rent};
+  waShareWithPDF(doc,type);
+};
+window.waSavedShare=function(doc,type){waShareWithPDF(doc,type);};
+
+function waShareWithPDF(doc,type){
+  // Generate PDF first then share
+  if(window.jspdf){
+    const{jsPDF}=window.jspdf;
+    const jd=new jsPDF('p','mm','a4');
+    const isInv=type==='invoice';
+    const CO2={name:"Irfan RCC Pipe Factory",addr:"Lehtrar Road, Foji Camp Stop, Near Dr. Sadaf Hospital, Islamabad",p1:"M. Irfan: 0311-0514692",p2:"Zahid Khan: 0312-5487080",email:"info@irfanrccpipefactory.com",website:"www.irfanrccpipefactory.com"};
+    jd.setFillColor(15,37,64);jd.rect(0,0,210,42,'F');
+    jd.setFillColor(200,135,10);jd.rect(0,42,210,3,'F');
+    jd.setTextColor(255,255,255);jd.setFontSize(15);jd.setFont('helvetica','bold');
+    jd.text(CO2.name,12,14);
+    jd.setFontSize(7.5);jd.setFont('helvetica','normal');jd.setTextColor(200,210,220);
+    jd.text(CO2.addr,12,21);jd.text(CO2.p1+' | '+CO2.p2,12,27);jd.text(CO2.email+' | '+CO2.website,12,33);
+    jd.setTextColor(255,255,255);jd.setFontSize(18);jd.setFont('helvetica','bold');
+    jd.text(isInv?'INVOICE':'QUOTATION',198,16,{align:'right'});
+    jd.setFontSize(8);jd.setFont('helvetica','normal');jd.setTextColor(180,195,210);
+    jd.text('No: '+doc.num,198,22,{align:'right'});
+    jd.text('Date: '+doc.date,198,27,{align:'right'});
+    jd.text((isInv?'Payment: '+(doc.pay||'Cash'):'Valid Until: '+(doc.valid||'-')),198,32,{align:'right'});
+    jd.setFillColor(248,250,252);jd.roundedRect(10,47,90,28,2,2,'F');
+    jd.setFillColor(248,250,252);jd.roundedRect(108,47,92,28,2,2,'F');
+    jd.setTextColor(100,110,130);jd.setFontSize(7);jd.setFont('helvetica','bold');
+    jd.text('BILL TO / گاہک',13,53);jd.text('FROM',111,53);
+    jd.setTextColor(26,60,94);jd.setFontSize(8.5);jd.setFont('helvetica','bold');
+    jd.text((doc.cname||'Walk-in').substring(0,35),13,59);jd.text(CO2.name,111,59);
+    jd.setTextColor(80,80,80);jd.setFontSize(7.5);jd.setFont('helvetica','normal');
+    if(doc.cphone)jd.text(doc.cphone,13,65);
+    jd.text(CO2.p1,111,65);jd.text(CO2.p2,111,70);
+    const labour=doc.labour||0,rent=doc.rent||0,da=doc.da||0,ta=doc.ta||0;
+    jd.autoTable({head:[['#','Item','Qty','Rate PKR','Total PKR']],body:(doc.items||[]).map((it,i)=>[i+1,(it.name||it.itemName||''),it.qty,'PKR '+f(it.rate),'PKR '+f(it.total)]),startY:79,headStyles:{fillColor:[26,60,94],fontSize:8},bodyStyles:{fontSize:8},columnStyles:{0:{cellWidth:8,halign:'center'},2:{cellWidth:14,halign:'center'},3:{cellWidth:26,halign:'right'},4:{cellWidth:26,halign:'right'}},margin:{left:10,right:10}});
+    let y=jd.lastAutoTable.finalY+5;
+    let totH=10;if(labour>0)totH+=6;if(rent>0)totH+=6;if(da>0)totH+=6;if(ta>0)totH+=6;
+    jd.setFillColor(241,245,249);jd.rect(120,y,80,totH,'F');
+    jd.setTextColor(80,80,80);jd.setFontSize(8);let ty=y+6;
+    jd.text('Subtotal:',122,ty);jd.text('PKR '+f(doc.sub),198,ty,{align:'right'});ty+=6;
+    if(labour>0){jd.text('Labour:',122,ty);jd.text('+ PKR '+f(labour),198,ty,{align:'right'});ty+=6;}
+    if(rent>0){jd.text('Rent:',122,ty);jd.text('+ PKR '+f(rent),198,ty,{align:'right'});ty+=6;}
+    jd.setFillColor(26,60,94);jd.rect(120,ty,80,10,'F');
+    jd.setTextColor(255,255,255);jd.setFontSize(10);jd.setFont('helvetica','bold');
+    jd.text('Grand Total:',122,ty+7);jd.text('PKR '+f(doc.grand),198,ty+7,{align:'right'});
+    y=ty+15;
+    const TERMS2=["50% advance, 25% at center stage, 25% before delivery.","Delivery within 3-7 working days after order confirmation.","Ex-Factory prices, subject to change without notice.","Transport charges not included unless mentioned.","All claims must be reported at time of delivery."];
+    if(y>245){jd.addPage();y=15;}
+    jd.setFillColor(250,250,250);jd.roundedRect(10,y,190,32,2,2,'F');
+    jd.setTextColor(26,60,94);jd.setFontSize(7.5);jd.setFont('helvetica','bold');
+    jd.text('Terms & Conditions:',13,y+6);
+    jd.setFont('helvetica','normal');jd.setTextColor(80,80,80);jd.setFontSize(7);
+    let yt=y+12;TERMS2.forEach((t,i)=>{jd.text('✓ '+(i+1)+'. '+t,13,yt,{maxWidth:184});yt+=5;});
+    y+=38;
+    jd.setFillColor(15,37,64);jd.rect(0,y+5,210,15,'F');
+    jd.setTextColor(200,210,220);jd.setFontSize(7.5);
+    jd.text(CO2.name+' | '+CO2.p1+' | '+CO2.p2,105,y+12,{align:'center'});
+
+    // Save PDF and open WhatsApp
+    const fname=(isInv?'Invoice':'Quotation')+'-'+doc.num+'.pdf';
+    jd.save(fname);
+    
+    // After PDF downloads, show WhatsApp share options
+    setTimeout(()=>{
+      showWAOptions(doc,type,fname);
+    },500);
+  } else {
+    showWAOptions(doc,type,'');
+  }
+}
+
+function showWAOptions(doc,type,pdfName){
+  var phone=(doc.cphone||'').replace(/[^0-9]/g,'');
+  var modal=document.getElementById('editModal');
+  var title=document.getElementById('editModalTitle');
+  var body=document.getElementById('editModalBody');
+  var saveBtn=document.getElementById('editSaveBtn');
+  title.textContent='📲 WhatsApp Share';
+  if(saveBtn)saveBtn.style.display='none';
+  var isInv=type==='invoice';
+  var txt='*Irfan RCC Pipe Factory*\n';
+  txt+='📍 Lehtrar Road, Islamabad\n';
+  txt+='📞 0311-0514692 | 0312-5487080\n\n';
+  txt+='*'+(isInv?'INVOICE':'QUOTATION')+'*\n';
+  txt+='No: *'+doc.num+'*\n';
+  txt+='Date: '+doc.date+'\n';
+  if(doc.cname)txt+='Customer: *'+doc.cname+'*\n\n';
+  txt+='*Items:*\n';
+  (doc.items||[]).forEach(function(it,i){txt+=(i+1)+'. '+(it.name||it.itemName||'')+' x '+it.qty+' @ PKR '+f(it.rate)+' = *PKR '+f(it.total)+'*\n';});
+  txt+='\n';
+  if((doc.labour||0)>0)txt+='Labour: PKR '+f(doc.labour)+'\n';
+  if((doc.rent||0)>0)txt+='Rent: PKR '+f(doc.rent)+'\n';
+  txt+='\n* Grand Total: PKR '+f(doc.grand)+'*\n';
+  if(isInv)txt+='Payment: '+(doc.pay||'Cash')+'\n';
+  txt+='\nAap ke karobar ka shukriya!';
+  
+  var encodedTxt=encodeURIComponent(txt);
+  var waNum=phone.startsWith('0')?'92'+phone.substring(1):(phone.startsWith('92')?phone:'92'+phone);
+  
+  body.innerHTML='<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;color:#166534">PDF download ho gayi — ab WhatsApp pe bhejo</div>'
+    +'<div style="margin-bottom:12px"><label style="font-size:11px;font-weight:600;color:#6b7a8d;display:block;margin-bottom:4px">Customer WhatsApp Number</label>'
+    +'<input id="wa-ph" value="'+phone+'" placeholder="923XXXXXXXXX" style="width:100%;padding:8px;border:1px solid #dde3ec;border-radius:6px;font-size:13px"/></div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">'
+    +'<button class="btn bwa" style="flex:1" id="wa-send-btn">📲 Send WhatsApp</button>'
+    +'<button class="btn bp" style="flex:1" id="wa-copy-btn">📋 Copy Text</button>'
+    +'</div>'
+    +'<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:10px;font-size:11px;color:#92400e">'
+    +'<b>PDF attach karne ke liye:</b><br>1. PDF download ho gayi<br>2. WhatsApp → customer → 📎 → PDF select karo</div>';
+  
+  modal.classList.add('open');
+  
+  setTimeout(function(){
+    var sendBtn=document.getElementById('wa-send-btn');
+    var copyBtn=document.getElementById('wa-copy-btn');
+    if(sendBtn){
+      sendBtn.onclick=function(){
+        var ph2=document.getElementById('wa-ph').value.replace(/[^0-9]/g,'');
+        var wn=ph2.startsWith('0')?'92'+ph2.substring(1):(ph2.startsWith('92')?ph2:'92'+ph2);
+        window.open('https://wa.me/'+wn+'?text='+encodedTxt,'_blank');
+      };
+    }
+    if(copyBtn){
+      copyBtn.onclick=function(){
+        navigator.clipboard.writeText(txt).then(function(){toast('✅ Copied!','ok');});
+      };
+    }
+  },100);
+}
+// waSavedShare moved to waShare
+window.waShareDoc=function(){if(!CP)return;waShareWithPDF(CP.doc,CP.type);};
+
+// EXPORT / UTILS
+// EXPENSE TABS
+window.showExpTab=function(tab){
+  ['factory','office','transport'].forEach(t=>{
+    const el=document.getElementById('exp-'+t);
+    if(el)el.style.display=t===tab?'block':'none';
+  });
+  document.getElementById('etab1').className='btn '+(tab==='factory'?'bp':'bo2');
+  document.getElementById('etab2').className='btn '+(tab==='office'?'bp':'bo2');
+  document.getElementById('etab3').className='btn '+(tab==='transport'?'bp':'bo2');
+  if(tab==='factory')renderFactoryExp();
+  if(tab==='office')renderOfficeExp();
+  if(tab==='transport')renderTransport();
+};
+
+// FACTORY EXPENSES
+window.saveFactoryExp=function(){
+  const amt=parseFloat(document.getElementById('fex4')?.value)||0;
+  if(!amt){toast('Amount required','err');return;}
+  const e={id:'fe'+Date.now(),etype:'factory',date:g('fex1'),cat:g('fex2'),desc:g('fex3'),amt,paid:g('fex5'),meth:g('fex6')};
+  D.expenses.push(e);saveFB('expenses/'+e.id,e);
+  renderFactoryExp();s('fex3','');s('fex4','');s('fex5','');toast('Factory expense saved!','ok');
+};
+function renderFactoryExp(){
+  const q=(g('fexs')||'').toLowerCase();
+  const rows=D.expenses.filter(e=>e.etype==='factory'&&((e.desc||'').toLowerCase().includes(q)||(e.cat||'').toLowerCase().includes(q)));
+  const tb=document.getElementById('fextb');if(!tb)return;
+  const tot=rows.reduce((s,e)=>s+(e.amt||0),0);
+  const td=document.getElementById('fext');if(td)td.textContent='Factory Total: PKR '+f(tot);
+  tb.innerHTML=rows.length?rows.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(e=>`<tr><td>${e.date||'-'}</td><td><span class="badge bye">${e.cat}</span></td><td>${e.desc||'-'}</td><td><b>PKR ${f(e.amt)}</b></td><td>${e.paid||'-'}</td><td>${e.meth||'-'}</td><td style="display:flex;gap:4px"><button class="btn bp bsm" onclick="openEdit('fexpense','${e.id}')">✏️</button><button class="btn bd bsm" onclick="delExpNew('${e.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="7" style="text-align:center;color:#aaa;padding:14px">No factory expenses</td></tr>';
+}
+
+// OFFICE EXPENSES
+window.saveOfficeExp=function(){
+  const amt=parseFloat(document.getElementById('oex4')?.value)||0;
+  if(!amt){toast('Amount required','err');return;}
+  const e={id:'oe'+Date.now(),etype:'office',date:g('oex1'),cat:g('oex2'),desc:g('oex3'),amt,paid:g('oex5'),meth:g('oex6')};
+  D.expenses.push(e);saveFB('expenses/'+e.id,e);
+  renderOfficeExp();s('oex3','');s('oex4','');s('oex5','');toast('Office expense saved!','ok');
+};
+function renderOfficeExp(){
+  const q=(g('oexs')||'').toLowerCase();
+  const rows=D.expenses.filter(e=>e.etype==='office'&&((e.desc||'').toLowerCase().includes(q)||(e.cat||'').toLowerCase().includes(q)));
+  const tb=document.getElementById('oextb');if(!tb)return;
+  const tot=rows.reduce((s,e)=>s+(e.amt||0),0);
+  const td=document.getElementById('oext');if(td)td.textContent='Office Total: PKR '+f(tot);
+  tb.innerHTML=rows.length?rows.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(e=>`<tr><td>${e.date||'-'}</td><td><span class="badge bbl">${e.cat}</span></td><td>${e.desc||'-'}</td><td><b>PKR ${f(e.amt)}</b></td><td>${e.paid||'-'}</td><td>${e.meth||'-'}</td><td style="display:flex;gap:4px"><button class="btn bp bsm" onclick="openEdit('oexpense','${e.id}')">✏️</button><button class="btn bd bsm" onclick="delExpNew('${e.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="7" style="text-align:center;color:#aaa;padding:14px">No office expenses</td></tr>';
+}
+
+// TRANSPORT
+window.calcTransport=function(){
+  const cost=parseFloat(document.getElementById('tex6')?.value)||0;
+  const charged=parseFloat(document.getElementById('tex7')?.value)||0;
+  const profit=charged-cost;
+  const el=document.getElementById('tp-cost');if(el)el.textContent='PKR '+f(cost);
+  const el2=document.getElementById('tp-charged');if(el2)el2.textContent='PKR '+f(charged);
+  const el3=document.getElementById('tp-profit');
+  const lbl=document.getElementById('tp-label');
+  if(el3){el3.textContent='PKR '+f(Math.abs(profit));el3.style.color=profit>=0?'#fbbf24':'#fca5a5';}
+  if(lbl)lbl.textContent=profit>=0?'Your Profit / منافع':'Loss / نقصان';
+};
+window.saveTransport=function(){
+  const cost=parseFloat(document.getElementById('tex6')?.value)||0;
+  const charged=parseFloat(document.getElementById('tex7')?.value)||0;
+  if(!cost&&!charged){toast('Enter amounts','err');return;}
+  const t={id:'tr'+Date.now(),etype:'transport',date:g('tex1'),vtype:g('tex2'),driver:g('tex3'),route:g('tex4'),customer:g('tex5'),cost,charged,profit:charged-cost,meth:g('tex8'),notes:g('tex9')};
+  D.expenses.push(t);saveFB('expenses/'+t.id,t);
+  renderTransport();
+  ['tex3','tex4','tex5','tex6','tex7','tex9'].forEach(x=>s(x,''));
+  calcTransport();
+  toast('Transport saved!','ok');
+};
+window.delExpNew=function(id){if(!confirm('Delete?'))return;D.expenses=D.expenses.filter(x=>x.id!==id);saveFB('expenses/'+id,null);renderFactoryExp();renderOfficeExp();renderTransport();};
+function renderTransport(){
+  const q=(g('texs')||'').toLowerCase();
+  const rows=D.expenses.filter(e=>e.etype==='transport'&&((e.route||'').toLowerCase().includes(q)||(e.customer||'').toLowerCase().includes(q)||(e.driver||'').toLowerCase().includes(q)));
+  const tb=document.getElementById('textb');if(!tb)return;
+  const totProfit=rows.reduce((s,e)=>s+(e.profit||0),0);
+  const totCost=rows.reduce((s,e)=>s+(e.cost||0),0);
+  const td=document.getElementById('text-total');
+  if(td)td.innerHTML='Total Cost: <b>PKR '+f(totCost)+'</b> &nbsp;|&nbsp; Total Profit / منافع: <b style="color:var(--gr)">PKR '+f(totProfit)+'</b>';
+  const html=rows.length?rows.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(function(e){
+    var pc=e.profit>=0?'var(--gr)':'var(--re)';
+    var id=e.id;
+    return '<tr><td>'+(e.date||'-')+'</td><td><span class="badge bbl">'+(e.vtype||'-')+'</span></td><td>'+(e.route||'-')+'</td><td>'+(e.customer||'-')+'</td><td>PKR '+f(e.cost)+'</td><td>PKR '+f(e.charged)+'</td><td><b style="color:'+pc+'">PKR '+f(e.profit)+'</b></td><td><button class="btn bd bsm" onclick="delExpNew('+JSON.stringify(id)+')">🗑️</button></td></tr>';
+  }).join(''):'<tr><td colspan="8" style="text-align:center;color:#aaa;padding:14px">No transport records</td></tr>';
+  tb.innerHTML=html;
+}
+
+
+// ===== UNIVERSAL EDIT SYSTEM =====
+let currentEditType = null;
+let currentEditId = null;
+
+window.closeEditModal = function(){
+  document.getElementById('editModal').classList.remove('open');
+  currentEditType = null; currentEditId = null;
+  const sb=document.getElementById('editSaveBtn');if(sb)sb.style.display='';
+};
+
+window.openEdit = function(type, id){
+  currentEditType = type; currentEditId = id;
+  const modal = document.getElementById('editModal');
+  const title = document.getElementById('editModalTitle');
+  const body = document.getElementById('editModalBody');
+  
+  if(type === 'customer'){
+    const c = D.customers.find(x=>x.id===id); if(!c)return;
+    title.textContent = '✏️ Edit Customer / گاہک';
+    body.innerHTML = `
+      <div class="fg2">
+        <div class="fg"><label>Name / نام *</label><input id="ed-cn1" value="${c.name||''}"/></div>
+        <div class="fg"><label>Phone</label><input id="ed-cn2" value="${c.phone||''}"/></div>
+        <div class="fg"><label>Address</label><input id="ed-cn3" value="${c.addr||''}"/></div>
+        <div class="fg"><label>City</label><input id="ed-cn4" value="${c.city||''}"/></div>
+        <div class="fg"><label>CNIC</label><input id="ed-cn6" value="${c.cnic||''}"/></div>
+        <div class="fg"><label>Opening Balance</label><input id="ed-cn7" type="number" value="${c.ob||0}"/></div>
+      </div>`;
+  }
+  else if(type === 'supplier'){
+    const su = D.suppliers.find(x=>x.id===id); if(!su)return;
+    title.textContent = '✏️ Edit Supplier / سپلائر';
+    body.innerHTML = `
+      <div class="fg2">
+        <div class="fg"><label>Name *</label><input id="ed-su1" value="${su.name||''}"/></div>
+        <div class="fg"><label>Contact</label><input id="ed-su2" value="${su.contact||''}"/></div>
+        <div class="fg"><label>Phone</label><input id="ed-su3" value="${su.phone||''}"/></div>
+        <div class="fg"><label>Address</label><input id="ed-su4" value="${su.addr||''}"/></div>
+        <div class="fg"><label>City</label><input id="ed-su5" value="${su.city||''}"/></div>
+      </div>`;
+  }
+  else if(type === 'employee'){
+    const e = D.employees.find(x=>x.id===id); if(!e)return;
+    title.textContent = '✏️ Edit Employee / ملازم';
+    body.innerHTML = `
+      <div class="fg2">
+        <div class="fg"><label>Name *</label><input id="ed-em1" value="${e.name||''}"/></div>
+        <div class="fg"><label>CNIC</label><input id="ed-em2" value="${e.cnic||''}"/></div>
+        <div class="fg"><label>Phone</label><input id="ed-em3" value="${e.phone||''}"/></div>
+        <div class="fg"><label>Salary PKR</label><input id="ed-em5" type="number" value="${e.sal||0}"/></div>
+        <div class="fg"><label>Address</label><input id="ed-em7" value="${e.addr||''}"/></div>
+      </div>`;
+  }
+  else if(type === 'fexpense'){
+    const e = D.expenses.find(x=>x.id===id); if(!e)return;
+    title.textContent = '✏️ Edit Factory Expense';
+    body.innerHTML = `
+      <div class="fg2">
+        <div class="fg"><label>Date</label><input id="ed-fex1" type="date" value="${e.date||''}"/></div>
+        <div class="fg"><label>Description</label><input id="ed-fex3" value="${e.desc||''}"/></div>
+        <div class="fg"><label>Amount PKR *</label><input id="ed-fex4" type="number" value="${e.amt||0}"/></div>
+        <div class="fg"><label>Paid To</label><input id="ed-fex5" value="${e.paid||''}"/></div>
+      </div>`;
+  }
+  else if(type === 'oexpense'){
+    const e = D.expenses.find(x=>x.id===id); if(!e)return;
+    title.textContent = '✏️ Edit Office Expense';
+    body.innerHTML = `
+      <div class="fg2">
+        <div class="fg"><label>Date</label><input id="ed-oex1" type="date" value="${e.date||''}"/></div>
+        <div class="fg"><label>Description</label><input id="ed-oex3" value="${e.desc||''}"/></div>
+        <div class="fg"><label>Amount PKR *</label><input id="ed-oex4" type="number" value="${e.amt||0}"/></div>
+        <div class="fg"><label>Paid To</label><input id="ed-oex5" value="${e.paid||''}"/></div>
+      </div>`;
+  }
+  else if(type === 'transport'){
+    const e = D.expenses.find(x=>x.id===id); if(!e)return;
+    title.textContent = '✏️ Edit Transport';
+    body.innerHTML = `
+      <div class="fg2">
+        <div class="fg"><label>Date</label><input id="ed-tex1" type="date" value="${e.date||''}"/></div>
+        <div class="fg"><label>Route</label><input id="ed-tex4" value="${e.route||''}"/></div>
+        <div class="fg"><label>Customer</label><input id="ed-tex5" value="${e.customer||''}"/></div>
+        <div class="fg"><label>Actual Cost PKR</label><input id="ed-tex6" type="number" value="${e.cost||0}"/></div>
+        <div class="fg"><label>Charged from Customer</label><input id="ed-tex7" type="number" value="${e.charged||0}"/></div>
+      </div>`;
+  }
+  else if(type === 'production'){
+    const p = D.production.find(x=>x.id===id); if(!p)return;
+    title.textContent = '✏️ Edit Production / پیداوار';
+    const itemOpts = D.items.map(it=>`<option value="${it.id}" ${it.id===p.iid?'selected':''}>${it.name}</option>`).join('');
+    body.innerHTML = `
+      <div class="fg2">
+        <div class="fg"><label>Date</label><input id="ed-pr1" type="date" value="${p.date||''}"/></div>
+        <div class="fg"><label>Item</label><select id="ed-pr2"><option value="">--Select--</option>${itemOpts}</select></div>
+        <div class="fg"><label>Qty Produced</label><input id="ed-pr3" type="number" value="${p.qty||0}"/></div>
+        <div class="fg"><label>Workers</label><input id="ed-pr4" type="number" value="${p.workers||0}"/></div>
+        <div class="fg"><label>Labour Cost PKR</label><input id="ed-pr5" type="number" value="${p.labour||0}"/></div>
+        <div class="fg"><label>Supervisor</label><input id="ed-pr6" value="${p.sup||''}"/></div>
+        <div class="fg"><label>Notes</label><input id="ed-pr7" value="${p.notes||''}"/></div>
+      </div>`;
+  }
+  modal.classList.add('open');
+};
+
+window.saveEdit = function(){
+  if(!currentEditType || !currentEditId) return;
+  const id = currentEditId;
+  const gv = (eid)=>{ const el=document.getElementById(eid); return el?el.value:''; };
+  const nv = (eid)=>{ return parseFloat(gv(eid))||0; };
+  
+  if(currentEditType === 'customer'){
+    const idx=D.customers.findIndex(x=>x.id===id); if(idx===-1)return;
+    D.customers[idx]={...D.customers[idx],name:gv('ed-cn1'),phone:gv('ed-cn2'),addr:gv('ed-cn3'),city:gv('ed-cn4'),cnic:gv('ed-cn6'),ob:nv('ed-cn7')};
+    saveFB('customers/'+id,D.customers[idx]); renderCusts();
+  }
+  else if(currentEditType === 'supplier'){
+    const idx=D.suppliers.findIndex(x=>x.id===id); if(idx===-1)return;
+    D.suppliers[idx]={...D.suppliers[idx],name:gv('ed-su1'),contact:gv('ed-su2'),phone:gv('ed-su3'),addr:gv('ed-su4'),city:gv('ed-su5')};
+    saveFB('suppliers/'+id,D.suppliers[idx]); renderSupps();
+  }
+  else if(currentEditType === 'employee'){
+    const idx=D.employees.findIndex(x=>x.id===id); if(idx===-1)return;
+    D.employees[idx]={...D.employees[idx],name:gv('ed-em1'),cnic:gv('ed-em2'),phone:gv('ed-em3'),sal:nv('ed-em5'),addr:gv('ed-em7')};
+    saveFB('employees/'+id,D.employees[idx]); renderEmps();
+  }
+  else if(currentEditType === 'fexpense'){
+    const idx=D.expenses.findIndex(x=>x.id===id); if(idx===-1)return;
+    D.expenses[idx]={...D.expenses[idx],date:gv('ed-fex1'),desc:gv('ed-fex3'),amt:nv('ed-fex4'),paid:gv('ed-fex5')};
+    saveFB('expenses/'+id,D.expenses[idx]); renderFactoryExp();
+  }
+  else if(currentEditType === 'oexpense'){
+    const idx=D.expenses.findIndex(x=>x.id===id); if(idx===-1)return;
+    D.expenses[idx]={...D.expenses[idx],date:gv('ed-oex1'),desc:gv('ed-oex3'),amt:nv('ed-oex4'),paid:gv('ed-oex5')};
+    saveFB('expenses/'+id,D.expenses[idx]); renderOfficeExp();
+  }
+  else if(currentEditType === 'transport'){
+    const idx=D.expenses.findIndex(x=>x.id===id); if(idx===-1)return;
+    const cost=nv('ed-tex6'), charged=nv('ed-tex7');
+    D.expenses[idx]={...D.expenses[idx],date:gv('ed-tex1'),route:gv('ed-tex4'),customer:gv('ed-tex5'),cost,charged,profit:charged-cost};
+    saveFB('expenses/'+id,D.expenses[idx]); renderTransport();
+  }
+  else if(currentEditType === 'production'){
+    const idx=D.production.findIndex(x=>x.id===id); if(idx===-1)return;
+    const iid=gv('ed-pr2'); const item=D.items.find(i=>i.id===iid);
+    D.production[idx]={...D.production[idx],date:gv('ed-pr1'),iid,iname:item?item.name:'Unknown',qty:nv('ed-pr3'),workers:nv('ed-pr4'),labour:nv('ed-pr5'),sup:gv('ed-pr6'),notes:gv('ed-pr7')};
+    saveFB('production/'+id,D.production[idx]); renderProd(); renderProdSummary();
+  }
+  toast('✅ Updated!','ok');
+  closeEditModal();
+};
+
+
+// ===== PURCHASE TRACKING =====
+window.showPurTab=function(tab){
+  ['add','history','ledger'].forEach(t=>{
+    var el=document.getElementById('pur-'+t);
+    if(el)el.style.display=t===tab?'block':'none';
+  });
+  document.getElementById('ptab1').className='btn '+(tab==='add'?'bp':'bo2');
+  document.getElementById('ptab2').className='btn '+(tab==='history'?'bp':'bo2');
+  document.getElementById('ptab3').className='btn '+(tab==='ledger'?'bp':'bo2');
+  if(tab==='history'){fillPurSupFilter();renderPurchases();}
+  if(tab==='ledger'){fillPurLedFilter();renderFactoryLedger();}
+};
+
+function fillPurSupDrop(){
+  ['pu-sup','pur-sup-filter','pur-led-filter','pur-pay-sup'].forEach(function(sid){
+    var sel=document.getElementById(sid); if(!sel)return;
+    var cur=sel.value;
+    sel.innerHTML=sid==='pu-sup'?'<option value="">-- Select Supplier --</option>':'<option value="">-- All / Select --</option>';
+    D.suppliers.forEach(function(su){sel.innerHTML+='<option value="'+su.id+'" '+(su.id===cur?'selected':'')+'>'+su.name+'</option>';});
+  });
+}
+function fillPurItemDrop(){
+  var sel=document.getElementById('pu-item'); if(!sel)return;
+  sel.innerHTML='<option value="">-- Select Item --</option>';
+  D.items.forEach(function(it){sel.innerHTML+='<option value="'+it.id+'" data-rate="'+it.buy+'">'+it.name+'</option>';});
+  sel.onchange=function(){
+    var opt=sel.options[sel.selectedIndex];
+    var rate=opt?parseFloat(opt.getAttribute('data-rate'))||0:0;
+    s('pu-rate',rate);calcPurchase();
+  };
+}
+
+window.calcPurchase=function(){
+  var qty=n('pu-qty'),rate=n('pu-rate'),trans=n('pu-trans'),paid=n('pu-paid');
+  var itemTotal=qty*rate, grand=itemTotal+trans, bal=grand-paid;
+  st('pu-itotal','PKR '+f(itemTotal));
+  st('pu-ttotal','PKR '+f(trans));
+  st('pu-gtotal','PKR '+f(grand));
+  var balEl=document.getElementById('pu-balance');
+  if(balEl){balEl.textContent='PKR '+f(Math.abs(bal));balEl.style.color=bal>0?'#fbbf24':'#86efac';}
+};
+
+window.savePurchase=function(){
+  var supId=g('pu-sup'),itemId=g('pu-item'),qty=n('pu-qty');
+  if(!supId){toast('❌ Select supplier','err');return;}
+  if(!itemId){toast('❌ Select item','err');return;}
+  if(!qty){toast('❌ Enter quantity','err');return;}
+  var sup=D.suppliers.find(function(x){return x.id===supId;});
+  var item=D.items.find(function(x){return x.id===itemId;});
+  var rate=n('pu-rate'),trans=n('pu-trans'),paid=n('pu-paid');
+  var grand=(qty*rate)+trans;
+  var pur={
+    id:'pu'+Date.now(),
+    num:'PUR-'+D.settings.pur,
+    date:g('pu-date'),
+    supId,supName:sup?sup.name:'-',
+    itemId,itemName:item?item.name:'-',
+    qty,rate,trans,paid,
+    grand,balance:grand-paid,
+    meth:g('pu-meth'),
+    notes:g('pu-notes')
+  };
+  D.purchases.push(pur);
+  D.settings.pur++;
+  // Update item stock
+  var idx=D.items.findIndex(function(i){return i.id===itemId;});
+  if(idx!==-1){D.items[idx].qty=(D.items[idx].qty||0)+qty;saveFB('items/'+itemId,D.items[idx]);}
+  saveFB('purchases/'+pur.id,pur);
+  saveFB('settings',D.settings);
+  // Reset form
+  ['pu-qty','pu-rate','pu-trans','pu-paid','pu-notes'].forEach(function(x){s(x,'');});
+  calcPurchase();
+  toast('✅ Purchase saved! Stock updated!','ok');
+  renderPurchases();
+};
+
+window.delPurchase=function(id){
+  if(!confirm('Delete?'))return;
+  D.purchases=D.purchases.filter(function(x){return x.id!==id;});
+  saveFB('purchases/'+id,null);
+  renderPurchases();toast('🗑️ Deleted');
+};
+
+function fillPurSupFilter(){fillPurSupDrop();}
+function fillPurLedFilter(){fillPurSupDrop();}
+
+function renderPurchases(){
+  var q=(g('pur-search')||'').toLowerCase();
+  var supF=g('pur-sup-filter'),df=g('pur-df'),dt=g('pur-dt');
+  var rows=D.purchases.filter(function(p){
+    var mq=((p.supName||'').toLowerCase().includes(q)||((p.itemName||'').toLowerCase().includes(q)));
+    var ms=!supF||p.supId===supF;
+    var md=(!df||p.date>=df)&&(!dt||p.date<=dt);
+    return mq&&ms&&md;
+  }).sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
+  var tb=document.getElementById('pur-tb'); if(!tb)return;
+  var totGrand=rows.reduce(function(s,p){return s+(p.grand||0);},0);
+  var totPaid=rows.reduce(function(s,p){return s+(p.paid||0);},0);
+  var totBal=rows.reduce(function(s,p){return s+(p.balance||0);},0);
+  var td=document.getElementById('pur-totals-display');
+  if(td)td.innerHTML='Total Purchases: <b>PKR '+f(totGrand)+'</b> | Paid: <b style="color:var(--gr)">PKR '+f(totPaid)+'</b> | Balance Due: <b style="color:var(--re)">PKR '+f(totBal)+'</b>';
+  tb.innerHTML=rows.length?rows.map(function(p){
+    var bc=p.balance>0?'var(--re)':'var(--gr)';
+    return '<tr><td>'+p.date+'</td><td><b>'+p.supName+'</b></td><td>'+p.itemName+'</td><td>'+p.qty+'</td><td>PKR '+f(p.rate)+'</td><td>PKR '+f(p.trans||0)+'</td><td><b>PKR '+f(p.grand)+'</b></td><td style="color:var(--gr)">PKR '+f(p.paid)+'</td><td><b style="color:'+bc+'">PKR '+f(p.balance||0)+'</b></td><td><button class="btn bd bsm" onclick="delPurchase(''+p.id+'')">🗑️</button></td></tr>';
+  }).join(''):'<tr><td colspan="10" style="text-align:center;color:#aaa;padding:16px">No purchases yet</td></tr>';
+}
+
+window.saveFactoryPayment=function(){
+  var supId=g('pur-pay-sup'),amt=n('pur-pay-amt');
+  if(!supId){toast('❌ Select factory','err');return;}
+  if(!amt){toast('❌ Enter amount','err');return;}
+  var sup=D.suppliers.find(function(x){return x.id===supId;});
+  var pay={id:'fp'+Date.now(),date:g('pur-pay-date'),supId,supName:sup?sup.name:'-',amt,meth:g('pur-pay-meth'),notes:g('pur-pay-notes'),type:'payment'};
+  D.factoryPayments.push(pay);
+  saveFB('factoryPayments/'+pay.id,pay);
+  // Update purchase balances
+  var remaining=amt;
+  D.purchases.filter(function(p){return p.supId===supId&&p.balance>0;}).forEach(function(p){
+    if(remaining<=0)return;
+    var apply=Math.min(remaining,p.balance);
+    p.balance-=apply; p.paid+=apply; remaining-=apply;
+    saveFB('purchases/'+p.id,p);
+  });
+  s('pur-pay-amt','');s('pur-pay-notes','');
+  toast('✅ Payment saved!','ok');
+  renderFactoryLedger();
+};
+
+function getFactoryBalance(supId){
+  var totalPurchases=D.purchases.filter(function(p){return p.supId===supId;}).reduce(function(s,p){return s+(p.grand||0);},0);
+  var totalPaid=D.purchases.filter(function(p){return p.supId===supId;}).reduce(function(s,p){return s+(p.paid||0);},0)+D.factoryPayments.filter(function(p){return p.supId===supId;}).reduce(function(s,p){return s+(p.amt||0);},0);
+  return{totalPurchases,totalPaid,balance:totalPurchases-totalPaid};
+}
+
+function renderFactoryLedger(){
+  var supId=g('pur-led-filter');
+  var sumDiv=document.getElementById('pur-led-summary');
+  var tb=document.getElementById('pur-led-tb');
+  
+  if(supId){
+    var sup=D.suppliers.find(function(x){return x.id===supId;});
+    var bal=getFactoryBalance(supId);
+    if(sumDiv&&sup){
+      sumDiv.innerHTML='<div style="background:linear-gradient(135deg,#0f2540,#1a3c5e);color:#fff;border-radius:10px;padding:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center">'
+        +'<div><div style="font-size:10px;opacity:.7">Total Purchased</div><div style="font-size:16px;font-weight:800">PKR '+f(bal.totalPurchases)+'</div></div>'
+        +'<div><div style="font-size:10px;opacity:.7">Total Paid / کل دیا</div><div style="font-size:16px;font-weight:800;color:#86efac">PKR '+f(bal.totalPaid)+'</div></div>'
+        +'<div style="background:'+(bal.balance>0?'rgba(220,38,38,.3)':'rgba(22,163,74,.3)')+'";border-radius:7px"><div style="font-size:10px;opacity:.7">'+(bal.balance>0?'Balance Due / باقی':'✅ Clear')+'</div><div style="font-size:18px;font-weight:900">PKR '+f(bal.balance)+'</div></div>'
+        +'</div>';
+    }
+    // Show transactions
+    var purRows=D.purchases.filter(function(p){return p.supId===supId;}).map(function(p){return{date:p.date,type:'purchase',item:p.itemName,qty:p.qty,amt:p.grand,notes:p.notes||''};});
+    var payRows=D.factoryPayments.filter(function(p){return p.supId===supId;}).map(function(p){return{date:p.date,type:'payment',item:'-',qty:'-',amt:p.amt,notes:p.notes||''};});
+    var all=[...purRows,...payRows].sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
+    var running=0;
+    var allWithBal=all.slice().reverse().map(function(r){
+      if(r.type==='purchase')running+=r.amt;
+      else running-=r.amt;
+      return{...r,runBal:running};
+    }).reverse();
+    if(tb)tb.innerHTML=allWithBal.length?allWithBal.map(function(r){
+      var tc=r.type==='purchase'?'<span class="badge bre">Purchase</span>':'<span class="badge bgr">Payment</span>';
+      var bc=r.runBal>0?'var(--re)':'var(--gr)';
+      return '<tr><td>'+r.date+'</td><td>'+tc+'</td><td>'+r.item+'</td><td>'+r.qty+'</td><td>PKR '+f(r.amt)+'</td><td><b style="color:'+bc+'">PKR '+f(r.runBal)+'</b></td><td>'+r.notes+'</td></tr>';
+    }).join(''):'<tr><td colspan="7" style="text-align:center;color:#aaa;padding:14px">No transactions</td></tr>';
+  } else {
+    // Show all factories summary
+    if(sumDiv){
+      var totalBal=D.suppliers.reduce(function(s,su){var b=getFactoryBalance(su.id);return s+(b.balance>0?b.balance:0);},0);
+      sumDiv.innerHTML='<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:7px;padding:10px 13px;margin-bottom:10px;font-size:13px;font-weight:700;color:#dc2626">🏭 Total Due to Factories / کل باقی: PKR '+f(totalBal)+'</div>'
+        +'<div class="tw"><table><thead><tr><th>Factory</th><th>Phone</th><th>Total Purchased</th><th>Total Paid</th><th>Balance Due</th></tr></thead><tbody>'
+        +D.suppliers.map(function(su){var b=getFactoryBalance(su.id);var bc=b.balance>0?'var(--re)':'var(--gr)';return'<tr><td><b>'+su.name+'</b></td><td>'+su.phone+'</td><td>PKR '+f(b.totalPurchases)+'</td><td style="color:var(--gr)">PKR '+f(b.totalPaid)+'</td><td><b style="color:'+bc+'">'+(b.balance>0?'PKR '+f(b.balance)+' باقی':'✅ Clear')+'</b></td></tr>';}).join('')
+        +'</tbody></table></div>';
+    }
+    if(tb)tb.innerHTML='';
+  }
+}
+
+window.exportData=function(){const b=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='rcc-backup-'+new Date().toISOString().split('T')[0]+'.json';a.click();toast('⬇️ Backup downloaded!','ok');};
+function f(n){return parseFloat(n||0).toLocaleString('en-PK',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function g(id){const el=document.getElementById(id);return el?el.value:'';}
+function n(id){return parseFloat(g(id))||0;}
+function s(id,val){const el=document.getElementById(id);if(el)el.value=val;}
+function st(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
+function setSS(type,txt){const d=document.getElementById('sd'),t=document.getElementById('st');d.className='sd'+(type==='ok'?' ok':type==='sy'?' sy':'');if(t)t.textContent=txt;}
+function showLo(t){document.getElementById('lo').classList.add('show');document.getElementById('lt').textContent=t||'';}
+function hideLo(){document.getElementById('lo').classList.remove('show');}
+function toast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='show '+(type||'');setTimeout(()=>t.className='',3000);}
+
+// INIT DATE FIELDS
+const today=new Date().toISOString().split('T')[0];
+['ex1','rt1','led-d','pr-d','fex1','oex1','tex1'].forEach(id=>s(id,today));
+// Mobile menu button visibility
+if(window.innerWidth<=768)document.getElementById('mbtn').style.display='inline-flex';
+window.addEventListener('resize',()=>{document.getElementById('mbtn').style.display=window.innerWidth<=768?'inline-flex':'none';});
+</script>
+
+<!-- UNIVERSAL EDIT MODAL -->
+<div class="mo" id="editModal">
+  <div class="md" style="max-width:500px">
+    <div class="mh">
+      <h3 id="editModalTitle">✏️ Edit</h3>
+      <button class="mc" onclick="closeEditModal()">✕</button>
+    </div>
+    <div id="editModalBody"></div>
+    <div class="br2" style="margin-top:14px">
+      <button class="btn ba" id="editSaveBtn" onclick="saveEdit()">💾 Update</button>
+      <button class="btn bo2" onclick="closeEditModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
