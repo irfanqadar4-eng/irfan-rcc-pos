@@ -598,7 +598,100 @@ tbody tr:last-child td{border-bottom:none;}
       </div>
     </div>
 
-    <!-- RETURNS -->
+   <!-- INVOICE -->
+<div id="page-invoice" class="pg">
+  <div class="card">
+    <div class="ct">🧾 New Invoice / نئی رسید</div>
+    <div class="fg2">
+      <div class="fg"><label>Invoice # </label><input id="iv1" placeholder="INV-1000"/></div>
+      <div class="fg"><label>Date / تاریخ</label><input id="iv2" type="date"/></div>
+      <div class="fg"><label>Customer / گاہک *</label><select id="iv3" onchange="fillC('iv')"><option value="">-- Select --</option></select></div>
+      <div class="fg"><label>Phone</label><input id="iv4" placeholder="Customer phone"/></div>
+      <div class="fg"><label>Address</label><input id="iv5" placeholder="Customer address"/></div>
+      <div class="fg"><label>Payment / ادائیگی</label><select id="iv6"><option>Cash</option><option>Easypaisa</option><option>JazzCash</option><option>Bank Transfer</option><option>Credit / ادھار</option></select></div>
+    </div>
+    <div class="dv"></div>
+    <div class="ct">📦 Items / اشیاء</div>
+    <div class="tw"><table class="itbl"><thead><tr><th>#</th><th>Item</th><th>Description</th><th>Qty</th><th>Rate PKR</th><th>Total</th><th></th></tr></thead><tbody id="ivr"></tbody></table></div>
+    <div class="br2"><button class="btn bo2 bsm" onclick="addR('iv')">➕ Add Row</button></div>
+    <div class="dv"></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
+      <div class="fg2" style="flex:1">
+        <div class="fg"><label>Labour / مزدوری PKR</label><input id="ivl" type="number" placeholder="0" oninput="calc('iv')"/></div>
+        <div class="fg"><label>Rent / کرایہ PKR</label><input id="ivrent" type="number" placeholder="0" oninput="calc('iv')"/></div>
+        <div class="fg"><label>Discount %</label><input id="ivd" type="number" placeholder="0" oninput="calc('iv')"/></div>
+        <div class="fg"><label>Tax %</label><input id="ivt" type="number" placeholder="0" oninput="calc('iv')"/></div>
+        <div class="fg"><label>Notes / نوٹس</label><input id="ivn" placeholder="Any notes..."/></div>
+      </div>
+      <div class="tbox">
+        <div class="tr2"><span>Subtotal:</span><span id="ivs1">PKR 0</span></div>
+        <div class="tr2"><span>Labour:</span><span id="ivl2">PKR 0</span></div>
+        <div class="tr2"><span>Rent:</span><span id="ivrent2">PKR 0</span></div>
+        <div class="tr2"><span>Discount:</span><span id="ivd2">-PKR 0</span></div>
+        <div class="tr2"><span>Tax:</span><span id="ivt2">+PKR 0</span></div>
+        <div class="tf2"><span>Grand Total:</span><span id="ivg">PKR 0</span></div>
+      </div>
+    </div>
+    <div class="br2">
+      <button class="btn bs" onclick="saveDoc('invoice')">✅ Save Invoice</button>
+      <button class="btn ba" onclick="prevDoc('invoice')">👁️ Preview</button>
+      <button class="btn bwa" onclick="waShare('invoice')">📲 WhatsApp</button>
+      <button class="btn bo2" onclick="resetDoc('invoice')">🔄 Reset</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">📋 Invoice History / رسیدوں کی فہرست</div>
+    <div class="sr"><input class="si" id="ivhs" placeholder="🔍 Search..." oninput="renderH('invoice')"/></div>
+    <div class="tw"><table><thead><tr><th>Invoice#</th><th>Date</th><th>Customer</th><th>Amount</th><th>Payment</th><th>Action</th></tr></thead><tbody id="ivhb"></tbody></table></div>
+  </div>
+</div>
+
+<!-- QUOTATION -->
+<div id="page-quotation" class="pg">
+  <div class="card">
+    <div class="ct">📋 New Quotation / نئی کوٹیشن</div>
+    <div class="fg2">
+      <div class="fg"><label>Quot # </label><input id="qt1" placeholder="QUOT-500"/></div>
+      <div class="fg"><label>Date / تاریخ</label><input id="qt2" type="date"/></div>
+      <div class="fg"><label>Valid Until / میعاد</label><input id="qt3" type="date"/></div>
+      <div class="fg"><label>Customer / گاہک *</label><select id="qt4" onchange="fillC('qt')"><option value="">-- Select --</option></select></div>
+      <div class="fg"><label>Phone</label><input id="qt5" placeholder="Customer phone"/></div>
+      <div class="fg"><label>Address</label><input id="qt6" placeholder="Customer address"/></div>
+    </div>
+    <div class="dv"></div>
+    <div class="ct">📦 Items / اشیاء</div>
+    <div class="tw"><table class="itbl"><thead><tr><th>#</th><th>Item</th><th>Description</th><th>Qty</th><th>Rate PKR</th><th>Total</th><th></th></tr></thead><tbody id="qtr"></tbody></table></div>
+    <div class="br2"><button class="btn bo2 bsm" onclick="addR('qt')">➕ Add Row</button></div>
+    <div class="dv"></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
+      <div class="fg2" style="flex:1">
+        <div class="fg"><label>Labour / مزدوری PKR</label><input id="qtl" type="number" placeholder="0" oninput="calc('qt')"/></div>
+        <div class="fg"><label>Rent / کرایہ PKR</label><input id="qtrent" type="number" placeholder="0" oninput="calc('qt')"/></div>
+        <div class="fg"><label>Discount %</label><input id="qtd" type="number" placeholder="0" oninput="calc('qt')"/></div>
+        <div class="fg"><label>Tax %</label><input id="qtt" type="number" placeholder="0" oninput="calc('qt')"/></div>
+        <div class="fg"><label>Notes / نوٹس</label><input id="qtn" placeholder="Any notes..."/></div>
+      </div>
+      <div class="tbox">
+        <div class="tr2"><span>Subtotal:</span><span id="qts1">PKR 0</span></div>
+        <div class="tr2"><span>Labour:</span><span id="qtl2">PKR 0</span></div>
+        <div class="tr2"><span>Rent:</span><span id="qtrent2">PKR 0</span></div>
+        <div class="tr2"><span>Discount:</span><span id="qtd2">-PKR 0</span></div>
+        <div class="tr2"><span>Tax:</span><span id="qtt2">+PKR 0</span></div>
+        <div class="tf2"><span>Grand Total:</span><span id="qtg">PKR 0</span></div>
+      </div>
+    </div>
+    <div class="br2">
+      <button class="btn bs" onclick="saveDoc('quotation')">✅ Save Quotation</button>
+      <button class="btn ba" onclick="prevDoc('quotation')">👁️ Preview</button>
+      <button class="btn bwa" onclick="waShare('quotation')">📲 WhatsApp</button>
+      <button class="btn bo2" onclick="resetDoc('quotation')">🔄 Reset</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">📋 Quotation History</div>
+    <div class="tw"><table><thead><tr><th>Quot#</th><th>Date</th><th>Customer</th><th>Amount</th><th>Valid Until</th><th>Action</th></tr></thead><tbody id="qthb"></tbody></table></div>
+  </div>
+</div> <!-- RETURNS -->
     <div id="page-returns" class="pg">
       <div class="card">
         <div class="ct">↩️ Add Return / واپسی</div>
